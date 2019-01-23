@@ -202,3 +202,21 @@ double cov(double* X, double* Y, int n) {
 	result = result / (n - 1);
 	return result;
 }
+
+double* question4(int64_t seed) {
+	//a
+	double out[4];
+	double* rand_num = getLGM(10000, seed);
+	double *z = box_muller(rand_num, 10000);
+	out[0] = black_scholes(0.04, 0.2, 88, 5, 100, z, 10000);
+	return out;
+}
+
+double black_scholes(double r, double sigma, double S0, double T, double X, double *nums, int n) {
+	double* W_T = wiener_process(nums, n, T);
+	double* result = new double[n];
+	for (int i = 0; i < n; ++i) {
+		result[i] = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T[i]) - X;
+	}
+	return exp(-r * T)*calc_mean(result, n);
+}

@@ -22,9 +22,12 @@ int main()
 	cout << "Ea2: " << question3(seed)[1] << endl;
 	cout << "Ea3: " << question3(seed)[2] << endl;
 	cout << "Ea4: " << question3(seed)[3] << endl;
+	cout << "c" << endl;
 	cout << "Ec1: " << question3(seed)[4] << endl;
 	cout << "Ec2: " << question3(seed)[5] << endl;
 	cout << "Ec3: " << question3(seed)[6] << endl;
-	cout << "Ec4: " << question3(seed)[7] << endl;
+	cout << "Ec4: " << question3(seed)[7] << endl << endl;
+	cout << "Question 4" << endl;
+	cout << "Ca1: " << question4(seed)[0] << endl;
 }
 
