@@ -15,7 +15,9 @@ double question2(int64_t seed);
 double * wiener_process(double* nums, int n, double t);
 double* question3(int64_t seed);
 double cov(double* X, double* Y, int n);
-double black_scholes(double r, double sigma, double S0, double T, double X, double *nums, int n);
+double euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic);
 double* question4(int64_t seed);
+double normalCDF(double x);
+double black_schole(double r, double sigma, double S0, double T, double X);
 
 #endif //RNG_H

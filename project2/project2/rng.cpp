@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <math.h>  
 #include "rng.h"
+#include <cmath>
+#include <iomanip>
 
 double * getLGM(int n, int64_t seed) {
 	int64_t m = pow(2, 31) - 1;
@@ -208,15 +210,62 @@ double* question4(int64_t seed) {
 	double out[4];
 	double* rand_num = getLGM(10000, seed);
 	double *z = box_muller(rand_num, 10000);
-	out[0] = black_scholes(0.04, 0.2, 88, 5, 100, z, 10000);
+	out[0] = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, false);
+	out[1] = black_schole(0.04, 0.2, 88, 5, 100);
+	out[2] = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, true);
 	return out;
 }
 
-double black_scholes(double r, double sigma, double S0, double T, double X, double *nums, int n) {
+double euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic) {
 	double* W_T = wiener_process(nums, n, T);
 	double* result = new double[n];
-	for (int i = 0; i < n; ++i) {
-		result[i] = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T[i]) - X;
+	double temp;
+	if (antithetic == false) {
+		for (int i = 0; i < n; ++i) {
+			temp = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T[i]) - X;
+			if (temp > 0) {
+				result[i] = temp;
+			}
+			else {
+				result[i] = 0;
+			}
+		}
 	}
+	else {
+		double* z2 = new double[n];
+		double temp2;
+		for (int i = 0; i < n; ++i) {
+			z2[i] = -nums[i];
+		}
+		double* W_T2 = wiener_process(z2, n, T);
+		for (int i = 0; i < n; ++i) {
+			temp = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T[i]) - X;
+			temp2 = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T2[i]) - X;
+			if (temp > 0 && temp2 > 0) {
+				result[i] = (temp + temp2)/2;
+			}
+			else if (temp > 0){
+				result[i] = temp/2;
+			}
+			else if (temp2 > 0) {
+				result[i] = temp2 / 2;
+			}
+			else {
+				result[i] = 0;
+			}
+		}
+	}
+	
 	return exp(-r * T)*calc_mean(result, n);
+}
+
+double normalCDF(double x) 
+{
+	return std::erfc(-x / std::sqrt(2)) / 2;
+}
+
+double black_schole(double r, double sigma, double S0, double T, double X) {
+	double d1 = (log(S0 / X) + (r + sigma * sigma / 2)*T) / (sigma*sqrt(T));
+	double d2 = d1 - sigma * sqrt(T);
+	return S0 * normalCDF(d1) - X * exp(-r * T) * normalCDF(d2);
 }

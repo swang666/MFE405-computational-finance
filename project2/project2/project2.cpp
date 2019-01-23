@@ -11,7 +11,7 @@ using namespace std;
 
 int main()
 {
-	int64_t seed = 1234567;
+	int64_t seed = 123456;
 	cout << "Question 1" << endl;
 	cout << question1(seed) << endl << endl;
 	cout << "Question 2" << endl;
@@ -29,5 +29,7 @@ int main()
 	cout << "Ec4: " << question3(seed)[7] << endl << endl;
 	cout << "Question 4" << endl;
 	cout << "Ca1: " << question4(seed)[0] << endl;
+	cout << "Cb1: " << question4(seed)[1] << endl;
+	cout << "Cb2: " << question4(seed)[2] << endl;
 }
 
