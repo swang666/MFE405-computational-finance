@@ -1,0 +1,55 @@
+---
+title: "project1 report"
+output: pdf_document
+---
+##MGMTMFE 405
+##Sumeng Wang
+
+##Question 1
+To make sure the output is same for each execution, the seed value ($X_0$) I chose for both LGM formula and the built in RNG is 12345. Then the mean and standard deviation for LGM RNG are 0.502587, 0.289223. And the mean and standard deviation for the built in RNG are 0.50078, 0.288234.  
+As we can see, they both demonstrated the property of the uniform distribution on the interval $[0,1]$
+
+##Question 2
+```{r echo=FALSE}
+df1 = read.csv('ques2.csv')
+names(df1) = 'x'
+hist(df1$x, 
+     main="Histogram for discrete model", 
+     xlab="X", 
+     border="blue", 
+     col="dark green")
+```
+As we can see from the histogram, the value of each x value resembles the probabilities: 0.3, 0.35, 0.2, 0.15.  
+The mean is 0.2105, the standard deviation is 1.03324.
+
+##Question 3
+```{r echo=FALSE}
+df2 = read.csv('ques3.csv')
+names(df2) = 'x'
+hist(df2$x, 
+     main="Histogram for binomial distribution of p = 0.64, n = 44", 
+     xlab="X", 
+     border="blue", 
+     col="dark green")
+```
+Base on this sample, $P(X \geq 40) = 0$. Theoretically, $P(X \geq 40) = 4.8 \times 10^{-5}$
+
+##Question 4
+$P(X \geq 1) = 0.5105$  
+$P(X \geq 4) = 0.0707$
+
+```{r echo=FALSE}
+df3 = read.csv('ques4.csv')
+names(df3) = 'x'
+hist(df3$x, 
+     main="Histogram for exponential distribution of lambda = 1.5", 
+     xlab="X", 
+     border="blue", 
+     col="dark green")
+```
+The mean is 1.49376, the standard deviation is 1.51844.
+
+##Question 5
+For Box-Muller, the mean is 0.00049, the standard deviation is 0.999.  
+For Polar-Marsaglia, the mean is -0.011, the standard deviation is 1.00958.  
+To compare the efficiency of both methods, we record the start time of both functions, and run the function. After that, we record the end time of both functions. Repeat this procedure for 1000 times. As a result, approximately 90\% of the time, Polar-Marsaglia executes faster. The reason might be trigonometric functions are much more expensive, even though Polar-Marsaglia needs to discard 23\% of the input.
