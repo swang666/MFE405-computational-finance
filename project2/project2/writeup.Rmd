@@ -1,0 +1,53 @@
+---
+title: "project2"
+author: "Sumeng Wang"
+date: "January 24, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Question 3  
+For this question, I used control variates techniques for all 4 functions. 
+For $X = W_5^2 + \sin(W_5)$, I picked $Y = W_5^2$. The reason behind this is that I observe $W_5^2$ plays a dominant part of the expectation of $X$, since the sine function can only return values range from -1 to 1.  
+As we can see from the output, The expectation of $X$ without the control variate is 4.91484, with variance 51.2986. After adding the control variate, the expectation became 4.99032, with variance only 0.502161, which is a very significant improvement.  
+For $X = e^{0.5/2}\cos(W_{0.5})$, I picked $Y = 0.03515W_{0.5}^4-0.6W_{0.5}^2+e^{\frac{0.5}{2}}$, to get this function, I solve for the system equation of $f(x) = ax^4 + bx^3 + cx^2 + dx + e$, where it equal to $e^{0.5/2}cos(x)$ at $x = -\pi, -\pi/2, 0, \pi/2, \pi$. The expectation of $X$ without the control variate is 1.0047, with variance 0.126456. After adding the control variate, the expectation became 1.00006, with variance 7.4e-05.  
+Similarly, using the same techniques, the control variate I got for $X = e^{3.2/2}\cos(W_{3.2})$ is $Y = 0.1356W_{3.2}^4-2.34W_{3.2}^2+e^{\frac{3.2}{2}}$. The expectation of $X$ without the control variate is 1.05278, with variance 11.1643. After adding the control variate, the expectation became 1.03549, with variance 9.53322.  
+For $X = e^{6.5/2}\cos(W_{6.5})$ is $Y = 0.706W_{6.5}^4-12.19W_{6.5}^2+e^{\frac{6.5}{2}}$. The expectation of $X$ without the control variate is 1.20924, with variance 329.772. After adding the control variate, the expectation became 1.19619, with variance 323.986.  
+Therefore, as $t$ grows bigger, the control variate I chose has a diminished effect. It performs best while $t$ is relatively small. This result makes sense because as $t$ grows bigger, the correlation between $X$ and $Y$ becomes smaller and smaller, eventually becomes negative.   
+
+##Question 4
+For this question, I used antithetic variates technique to reduce variance. After using $Z_i$ to generate $S_1$, I use $-Z_i$ to generate $S_2$. And $S_1,S_2$ have the same expectation. So to calculate the call option price, we take the expectation of $(S_1+S_2)/2$.  
+As a result, $E(S_1) = 18.5596$, with variance 1071.69. $E((S_1+S_2)/2) = 18.0692$, with variance only 352.278. Although the accuracy of the estimation doesn't seem to improve significantly. The variance is greatly reduced.  
+
+##Question 5
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library("reshape2")
+library("ggplot2")
+df = read.csv('ques5a.csv')
+df$x = seq(0,10,1)
+df1 = read.csv('ques5b.csv')
+df1$x = seq(0,9.99,0.01)
+df1_melt = melt(df1, id="x")
+df2 = read.csv('ques5d.csv')
+df2$x = seq(0,9.99,0.01)
+df2_melt = melt(df2, id="x")
+ggplot(data=df1_melt,
+       aes(x=x, y=value, colour=variable)) +
+       geom_line() +
+       geom_line(data = df, aes(x =x, y = sigma1, colour = 'mean')) + 
+        xlab("t") + ylab("S(t)") + ggtitle("path of S(t) when sigma = 0.18")
+ggplot(data=df2_melt,
+       aes(x=x, y=value, colour=variable)) +
+       geom_line() +
+       geom_line(data = df, aes(x =x, y = sigma2, colour = 'mean')) + 
+        xlab("t") + ylab("S(t)") + ggtitle("path of S(t) when sigma = 0.35")
+```
+As a result, the value of $\sigma$ does not really affect the expectation value of $S(t)$ because the theoretical expectation value of $S_t$ is $S_0e^{\mu t}$, which means $\sigma$ should not affect it at all. The reason for the difference between two expected values is that, as $\sigma$ becomes bigger, the variance of $S_t$ also becomes bigger. This might cause the sampling error which makes the expected value differs.  
+However, $\sigma$ has a significant impact on the magnitude of the Brownian Motion path. As $\sigma$ doubles, the volitility of the path doubles as well.  
+
+##Question 6
+For $\int_0^1 \sqrt(1-x^2) dx$, the $t(x)$ I chose is $\sqrt(1-x)$. The idea behind this is that $\frac{g(x)f(x)}{t(x)} = \sqrt{1+x}$, which is much more smoother than $\sqrt{1-x^2}$.  
+Next, we find the CDF of $t(x)$, which is $-\frac{2}{3}(1-x)^{3/2}$. Then we apply the inverse transformation, we get the distribution of $Y = 1 - (\frac{3x}{2})^{2/3}$, where $x$ is $U(0,1)$. After that, we generate a series of Y from this distribution. If $Y$ is not in $(0,1)$, the function should return 0. We then apply Monte Carlo on it.  
+As a result, before importance sampling, we get an expected value of 3.13208, with variance 0.0506. However, after using importance sampling, we only get an expected value of 3.12867, with variance 0.317245. Instead of decreasing, the variance increases. This might due to the bad choice of $t(x)$. Nevertheless, it was still a good attempt.

@@ -6,6 +6,8 @@
 #include <cmath>
 #include <iomanip>
 
+const double pi = atan(1) * 4;
+
 double * getLGM(int n, int64_t seed) {
 	int64_t m = pow(2, 31) - 1;
 	int a = pow(7, 5);
@@ -24,7 +26,6 @@ double * getLGM(int n, int64_t seed) {
 
 double * box_muller(double *nums, int n) {
 	double z1, z2;
-	double pi = atan(1) * 4;
 	double *std_norm = new double[n];
 	for (int i = 0; i < n; i = i + 2) {
 		z1 = sqrt(-2 * log(nums[i]))* cos(2 * pi * nums[i + 1]);
@@ -132,33 +133,27 @@ double * wiener_process(double* nums, int n, double t) {
 
 double* question3(int64_t seed) {
 	double* rand_num = getLGM(10000, seed);
-	double* rand_num2 = getLGM(10000, seed + 234);
 	double *z = box_muller(rand_num, 10000);
 	double* w1 = wiener_process(z, 10000, 5);
-	double result[8];
+	double result[16];
 	double Ea1[10000];
 	double control[10000];
 	for (int i = 0; i < 10000; ++i) {
 		Ea1[i] = w1[i] * w1[i] + sin(w1[i]);
 		control[i] = w1[i] * w1[i];
-		rand_num2[i] = 1 - rand_num[i];
 	}
 	result[0] = calc_mean(Ea1, 10000);
-	double *z2 = box_muller(rand_num2, 10000);
+	result[8] = cov(Ea1, Ea1, 10000);
 	double cov_w1_Ea1 = cov(Ea1, control, 10000);
 	double var_w1 = cov(control, control, 10000);
 	double gamma_1 = cov_w1_Ea1 / var_w1;
 
-	result[4] = calc_mean(vector_minus_v(Ea1, 10000, vector_mult(vector_minus(control, 10000, 5), 10000, gamma_1), false), 10000);
-
-	double pi = atan(1) * 4;
-
+	double *Ea1_b = vector_minus_v(Ea1, 10000, vector_mult(vector_minus(control, 10000, 5), 10000, gamma_1), false);
+	result[4] = calc_mean(Ea1_b, 10000);
+	result[9] = cov(Ea1_b, Ea1_b, 10000);
 	double* w2 = wiener_process(z, 10000, 0.5);
-	double* w2_p = wiener_process(z2, 10000, 0.5);
 	double* w3 = wiener_process(z, 10000, 3.2);
-	double* w3_p = wiener_process(z2, 10000, 3.2);
 	double* w4 = wiener_process(z, 10000, 6.5);
-	double* w4_p = wiener_process(z2, 10000, 6.5);
 	double Ea2[10000];
 	double Ea3[10000];
 	double Ea4[10000];
@@ -169,9 +164,9 @@ double* question3(int64_t seed) {
 		Ea2[i] = exp(0.5/2) * cos(w2[i]);
 		Ea3[i] = exp(3.2 / 2) * cos(w3[i]);
 		Ea4[i] = exp(6.5 / 2) * cos(w4[i]);
-		con2[i] = cos(w2[i]);
-		con3[i] = cos(w3[i]);
-		con4[i] = cos(w4[i]);
+		con2[i] = 0.03515 * pow(w2[i], 4) - 0.6 * pow(w2[i],2) + exp(0.25);
+		con3[i] = 0.1356 * pow(w3[i], 4) - 2.34 * pow(w3[i], 2) + exp(1.6);
+		con4[i] = 0.706 * pow(w4[i], 4) - 12.19 * pow(w4[i], 2) + exp(3.25);
 	}
 	double cov_con2_Ea2 = cov(Ea2, con2, 10000);
 	double var_con2 = cov(con2, con2, 10000);
@@ -184,11 +179,20 @@ double* question3(int64_t seed) {
 	double gamma_4 = cov_con4_Ea4 / var_con4;
 
 	result[1] = calc_mean(Ea2, 10000);
+	result[10] = cov(Ea2, Ea2, 10000);
 	result[2] = calc_mean(Ea3, 10000);
+	result[11] = cov(Ea3, Ea3, 10000);
 	result[3] = calc_mean(Ea4, 10000);
-	result[5] = calc_mean(vector_minus_v(Ea2, 10000, vector_mult(vector_minus(con2, 10000, exp(-0.5 / 2)), 10000, gamma_2), false), 10000);
-	result[6] = calc_mean(vector_minus_v(Ea3, 10000, vector_mult(vector_minus(con3, 10000, exp(-3.2 / 2)), 10000, gamma_3), false), 10000);
-	result[7] = calc_mean(vector_minus_v(Ea4, 10000, vector_mult(vector_minus(con4, 10000, exp(-6.5 / 2)), 10000, gamma_4), false), 10000);
+	result[12] = cov(Ea4, Ea4, 10000);
+	double* Ea2_b = vector_minus_v(Ea2, 10000, vector_mult(vector_minus(con2, 10000, 0.03515*3*0.5*0.5 - 0.6*0.5+ exp(0.25)), 10000, gamma_2), false);
+	double* Ea3_b = vector_minus_v(Ea3, 10000, vector_mult(vector_minus(con3, 10000, 0.1356 * 3 * 3.2*3.2 - 2.34*3.2 + exp(1.6)), 10000, gamma_3), false);
+	double* Ea4_b = vector_minus_v(Ea4, 10000, vector_mult(vector_minus(con4, 10000, 0.706 * 3 * 6.5*6.5 - 12.19*6.5 + exp(3.25)), 10000, gamma_4), false);
+	result[5] = calc_mean(Ea2_b, 10000);
+	result[13] = cov(Ea2_b, Ea2_b, 10000);
+	result[6] = calc_mean(Ea3_b, 10000);
+	result[14] = cov(Ea3_b, Ea3_b, 10000);
+	result[7] = calc_mean(Ea4_b, 10000);
+	result[15] = cov(Ea4_b, Ea4_b, 10000);
 	return result;
 }
 
@@ -207,16 +211,20 @@ double cov(double* X, double* Y, int n) {
 
 double* question4(int64_t seed) {
 	//a
-	double out[4];
+	double out[5];
 	double* rand_num = getLGM(10000, seed);
 	double *z = box_muller(rand_num, 10000);
-	out[0] = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, false);
+	double* p1 = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, false);
+	out[0] = exp(-0.04 * 5)* calc_mean(p1, 10000);
+	out[3] = exp(-0.04 * 10) * cov(p1, p1, 10000);
 	out[1] = black_schole(0.04, 0.2, 88, 5, 100);
-	out[2] = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, true);
+	double* p2 = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, true);
+	out[2] = exp(-0.04 * 5)* calc_mean(p2, 10000);
+	out[4] = exp(-0.04 * 10) * cov(p2, p2, 10000);
 	return out;
 }
 
-double euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic) {
+double* euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic) {
 	double* W_T = wiener_process(nums, n, T);
 	double* result = new double[n];
 	double temp;
@@ -256,7 +264,7 @@ double euro_call(double r, double sigma, double S0, double T, double X, double *
 		}
 	}
 	
-	return exp(-r * T)*calc_mean(result, n);
+	return result;
 }
 
 double normalCDF(double x) 
@@ -279,30 +287,77 @@ double* geometric_brownian_motion(double r, double sigma, double S0, double T, d
 	return result;
 }
 
-double* question5(int64_t seed, double* parta, double** partb) {
+void question5(int64_t seed, double* parta, double** partb, double* partc, double** partd) {
 	double out[4];
 	double* rand_num = getLGM(10000, seed);
 	double *z = box_muller(rand_num, 10000);
 	for (int i = 0; i < 10; ++i) {
 		parta[i] = calc_mean(geometric_brownian_motion(0.04, 0.18, 88, i + 1, z, 10000), 10000);
+		partc[i] = calc_mean(geometric_brownian_motion(0.04, 0.35, 88, i + 1, z, 10000), 10000);
 	}
 	for (int i = 0; i < 6; ++i) {
 		double* rand_num2 = getLGM(1000, seed+i*12345);
 		double* z2 = box_muller(rand_num2, 1000);
 		partb[i] = brownian_motion_path(0.04, 0.18, 88, 10, z2, 1000);
+		partd[i] = brownian_motion_path(0.04, 0.35, 88, 10, z2, 1000);
 	}
-	
-
-	return out;
 }
 
-double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, double n) {
-	double increment = T / n;
+double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, int n) {
+	double increment = T / (double)n;
 	double* result = new double[n];
 	result[0] = S0;
 	for (int i = 1; i < n; ++i) {
-		//result[i] = result[i-1] * exp((r - sigma * sigma / 2)*increment + sigma * (sqrt((double)(i)* increment) * nums[i] - sqrt((double)(i-1)* increment) * nums[i-1]));
 		result[i] = result[i - 1] * exp(sigma*sqrt(increment)*nums[i - 1] + r * increment);
+	}
+	return result;
+}
+
+double myfunc(double x) {
+	return sqrt(1 - x * x);
+}
+
+double myfunc2(double x) {
+	return sqrt(1 +x);
+}
+
+double euler_approx(double t, int n, double x0) {
+	double result = 0;
+	double dt = t / (double)n;
+	for (int i = 1; i < n; ++i) {
+		result = result + myfunc(x0)*dt;
+		x0 = x0 + dt;
+	}
+	return result;
+}
+
+double* question6(int64_t seed) {
+	double out[5];
+	out[0] = 4 * euler_approx(1, 10000, 0);
+	double* rand_num = getLGM(10000, seed);
+	double* mc = monte_carlo(rand_num, 10000, myfunc);
+	out[3] = cov(mc, mc, 10000);
+	out[1] = 4 * calc_mean(mc, 10000);
+	double rand_num2[10000];
+	for (int i = 0; i < 10000; ++i) {
+		rand_num2[i] = 1-pow(rand_num[i], 2.0/3.0)*pow(3.0/2.0,2.0/3.0);
+	}
+	double* mc2 = monte_carlo(rand_num2, 10000, myfunc2);
+	out[2] = 4 * calc_mean(mc2, 10000);
+	out[4] = cov(mc2, mc2, 10000);
+	return out;
+}
+
+double* monte_carlo(double* nums, int n, double (*f)(double)) {
+	double* result = new double[n];
+	for (int i = 0; i < n; ++i) {
+		if (nums[i] < 0 || nums[i] > 1) {
+			result[i] = 0;
+		}
+		else {
+			result[i] = (*f)(nums[i]);
+		}
+		
 	}
 	return result;
 }

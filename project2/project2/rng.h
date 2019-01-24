@@ -15,12 +15,16 @@ double question2(int64_t seed);
 double * wiener_process(double* nums, int n, double t);
 double* question3(int64_t seed);
 double cov(double* X, double* Y, int n);
-double euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic);
+double* euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic);
 double* question4(int64_t seed);
 double normalCDF(double x);
 double black_schole(double r, double sigma, double S0, double T, double X);
 double* geometric_brownian_motion(double r, double sigma, double S0, double T, double* nums, int n);
-double* question5(int64_t seed, double* parta, double** partb);
-double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, double n);
+void question5(int64_t seed, double* parta, double** partb, double* partc, double** partd);
+double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, int n);
+double euler_approx(double t, int n, double x0);
+double myfunc(double x);
+double* question6(int64_t seed);
+double* monte_carlo(double* nums, int n, double(*f)(double));
 
 #endif //RNG_H
