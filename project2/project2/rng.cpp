@@ -269,3 +269,40 @@ double black_schole(double r, double sigma, double S0, double T, double X) {
 	double d2 = d1 - sigma * sqrt(T);
 	return S0 * normalCDF(d1) - X * exp(-r * T) * normalCDF(d2);
 }
+
+double* geometric_brownian_motion(double r, double sigma, double S0, double T, double* nums, int n) {
+	double* W_T = wiener_process(nums, n, T);
+	double* result = new double[n];
+	for (int i = 0; i < n; ++i) {
+		result[i] = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T[i]);
+	}
+	return result;
+}
+
+double* question5(int64_t seed, double* parta, double** partb) {
+	double out[4];
+	double* rand_num = getLGM(10000, seed);
+	double *z = box_muller(rand_num, 10000);
+	for (int i = 0; i < 10; ++i) {
+		parta[i] = calc_mean(geometric_brownian_motion(0.04, 0.18, 88, i + 1, z, 10000), 10000);
+	}
+	for (int i = 0; i < 6; ++i) {
+		double* rand_num2 = getLGM(1000, seed+i*12345);
+		double* z2 = box_muller(rand_num2, 1000);
+		partb[i] = brownian_motion_path(0.04, 0.18, 88, 10, z2, 1000);
+	}
+	
+
+	return out;
+}
+
+double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, double n) {
+	double increment = T / n;
+	double* result = new double[n];
+	result[0] = S0;
+	for (int i = 1; i < n; ++i) {
+		//result[i] = result[i-1] * exp((r - sigma * sigma / 2)*increment + sigma * (sqrt((double)(i)* increment) * nums[i] - sqrt((double)(i-1)* increment) * nums[i-1]));
+		result[i] = result[i - 1] * exp(sigma*sqrt(increment)*nums[i - 1] + r * increment);
+	}
+	return result;
+}

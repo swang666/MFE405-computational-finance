@@ -1,0 +1,8 @@
+﻿  project2.cpp
+  rng.cpp
+d:\405\mfe405-computational-finance\project2\project2\rng.cpp(10): warning C4244: 'initializing': conversion from 'double' to 'int64_t', possible loss of data
+d:\405\mfe405-computational-finance\project2\project2\rng.cpp(11): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  Generating Code...
+d:\405\mfe405-computational-finance\project2\project2\rng.cpp(216): warning C4172: returning address of local variable or temporary: out
+d:\405\mfe405-computational-finance\project2\project2\rng.cpp(192): warning C4172: returning address of local variable or temporary: result
+  project2.vcxproj -> D:\405\MFE405-computational-finance\project2\x64\Debug\project2.exe

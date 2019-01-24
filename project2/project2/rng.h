@@ -19,5 +19,8 @@ double euro_call(double r, double sigma, double S0, double T, double X, double *
 double* question4(int64_t seed);
 double normalCDF(double x);
 double black_schole(double r, double sigma, double S0, double T, double X);
+double* geometric_brownian_motion(double r, double sigma, double S0, double T, double* nums, int n);
+double* question5(int64_t seed, double* parta, double** partb);
+double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, double n);
 
 #endif //RNG_H
