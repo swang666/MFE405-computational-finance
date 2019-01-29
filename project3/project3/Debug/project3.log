@@ -1,2 +1,9 @@
-﻿  project3.cpp
+﻿  rng.cpp
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(12): warning C4244: 'initializing': conversion from 'double' to 'int64_t', possible loss of data
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(13): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(99): warning C4101: 'temp': unreferenced local variable
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(322): warning C4101: 'out': unreferenced local variable
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(255): warning C4172: returning address of local variable or temporary: out
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(227): warning C4172: returning address of local variable or temporary: result
+d:\405\mfe405-computational-finance\project3\project3\rng.cpp(379): warning C4172: returning address of local variable or temporary: out
   project3.vcxproj -> D:\405\MFE405-computational-finance\project3\Debug\project3.exe
