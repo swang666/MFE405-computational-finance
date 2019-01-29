@@ -92,17 +92,16 @@ double* question1(int64_t seed) {
 		double YT_3[3001];
 		XT_2[0] = x0;
 		YT_3[0] = y0;
-		rand_num = getLGM(2002, seed + i * 200);
-		z1 = box_muller(rand_num, 2002);
-		rand_num2 = getLGM(3002, seed + 1234 + i * 200);
-		z2 = box_muller(rand_num2, 3002);
-		double temp;
+		rand_num = getLGM(2000, seed + i * 200);
+		z1 = box_muller(rand_num, 2000);
+		rand_num2 = getLGM(3000, seed + 1234 + i * 200);
+		z2 = box_muller(rand_num2, 3000);
 		double dt = 0.001;
 		for (int j = 1; j < 2001; ++j) {
-			XT_2[j] = XT_2[j - 1] + (0.2 - 0.5*XT_2[j - 1])* dt + 2.0 / 3.0 * (sqrt(j * dt)*z1[j] - sqrt((j - 1)*dt)*z1[j - 1]);
+			XT_2[j] = XT_2[j - 1] + (0.2 - 0.5*XT_2[j - 1])* dt + 2.0 / 3.0 * sqrt(dt)*z1[j - 1];
 		}
 		for (int j = 1; j < 3001; ++j) {
-			YT_3[j] = YT_3[j - 1] + (2.0 / (1 + (j-1) * dt) * YT_3[j - 1] + (1 + pow((j-1)*dt, 3)) / 3) * dt + (1 + pow((j-1)*dt, 3)) / 3 * (sqrt(j * dt)*z2[j] - sqrt((j - 1)*dt)*z2[j - 1]);
+			YT_3[j] = YT_3[j - 1] + (2.0 / (1 + (j-1) * dt) * YT_3[j - 1] + (1 + pow((j-1)*dt, 3)) / 3) * dt + (1 + pow((j-1)*dt, 3)) / 3 * sqrt(dt)*z2[j - 1];
 		}
 
 		if (YT_3[2000] > 5) {
@@ -134,24 +133,39 @@ double * generate_bivariate(double * z1,double * z2, int n, double rho) {
 	return y;
 }
 
-double question2(int64_t seed) {
-	double *rand_num = getLGM(10000, seed);
-	double *rand_num2 = getLGM(10000, seed + 200);
-	double *z1 = box_muller(rand_num, 10000);
-	double *z2 = box_muller(rand_num2, 10000);
-	double *y = generate_bivariate(z1, z2, 10000, 0.6);
-	double result[10000];
-	double temp;
-	for (int i = 0; i < 10000; ++i) {
-		temp = pow(z1[i], 3) + sin(y[i]) + z1[i] * z1[i] * y[i];
-		if (temp > 0) {
-			result[i] = temp;
+
+double* question2(int64_t seed) {
+	static double out[2];
+	double *rand_num;
+	double *rand_num2;
+	//double *rand_num2 = getLGM(2000, seed + 200);
+	double *w, *z;
+	//double *z2 = box_muller(rand_num2, 2000);
+	double x0 = 1;
+	double y0 = 1;
+	double result[1000];
+	double result2[1000];
+	for (int i = 0; i < 1000; ++i) {
+		double XT_3[3001];
+		double log_YT_3[3001];
+		XT_3[0] = x0;
+		log_YT_3[0] = log(y0);
+		rand_num = getLGM(3000, seed + i * 200);
+		w = box_muller(rand_num, 3000);
+		rand_num2 = getLGM(3000, seed + 12345 + i * 200);
+		z = box_muller(rand_num2, 3000);
+		double dt = 0.001;
+		for (int j = 1; j < 3001; ++j) {
+			XT_3[j] = XT_3[j-1] + 0.25 * XT_3[j - 1] * dt + 1.0 / 3.0 * XT_3[j - 1] * sqrt(dt) * w[j - 1] - 0.75 * XT_3[j - 1] * sqrt(dt) * z[j - 1] + 0.5 / 3.0 * XT_3[j - 1] / 3.0 * (sqrt(dt) * w[j - 1] * sqrt(dt) * w[j - 1] - dt) - 0.5 * 0.75 * XT_3[j - 1] * 0.75 * (sqrt(dt) * z[j - 1] * sqrt(dt) * z[j - 1] - dt);
+			log_YT_3[j] = log_YT_3[j - 1] - 0.08  * dt + 1.0 / 3.0 * sqrt(dt) * w[j - 1] + 0.75 * sqrt(dt) * z[j - 1];
 		}
-		else {
-			result[i] = 0;
-		}
+		result[i] = cbrt(1 + XT_3[3000]);
+		result2[i] = cbrt(1 + exp(log_YT_3[3000]));
+		
 	}
-	return calc_mean(result, 10000);
+	out[0] = calc_mean(result, 1000);
+	out[1] = calc_mean(result2, 1000);
+	return out;
 }
 
 double * wiener_process(double* nums, int n, double t) {

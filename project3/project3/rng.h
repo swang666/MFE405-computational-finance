@@ -11,7 +11,7 @@ double* vector_minus_v(double *nums1, int n, double *nums2, bool add);
 double* vector_mult(double *nums, int n, double num);
 double* question1(int64_t seed);
 double * generate_bivariate(double * z1, double * z2, int n, double rho);
-double question2(int64_t seed);
+double* question2(int64_t seed);
 double * wiener_process(double* nums, int n, double t);
 double* question3(int64_t seed);
 double cov(double* X, double* Y, int n);
