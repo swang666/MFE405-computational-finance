@@ -327,20 +327,24 @@ double* geometric_brownian_motion(double r, double sigma, double S0, double T, d
 	return result;
 }
 
-void question5(int64_t seed, double* parta, double** partb, double* partc, double** partd) {
-	double out[4];
-	double* rand_num = getLGM(10000, seed);
-	double *z = box_muller(rand_num, 10000);
-	for (int i = 0; i < 10; ++i) {
-		parta[i] = calc_mean(geometric_brownian_motion(0.04, 0.18, 88, i + 1, z, 10000), 10000);
-		partc[i] = calc_mean(geometric_brownian_motion(0.04, 0.35, 88, i + 1, z, 10000), 10000);
+double* question5(int64_t seed) {
+	double* out = new double[3];
+	double* result = halton_seq(2, 10000);
+	double* result2 = halton_seq(7, 10000);
+	double* result3 = halton_seq(4, 10000);
+	double* result4 = halton_seq(5, 10000);
+	double sum1[10000];
+	double sum2[10000];
+	double sum3[10000];
+	for (int i = 0; i < 10000; ++i) {
+		sum1[i] = exp(-result[i] * result2[i])*(sin(6 * pi *result[i]) + cbrt(cos(2 * pi*result2[i])));
+		sum2[i] = exp(-result[i] * result3[i])*(sin(6 * pi *result[i]) + cbrt(cos(2 * pi*result3[i])));
+		sum3[i] = exp(-result4[i] * result2[i])*(sin(6 * pi *result4[i]) + cbrt(cos(2 * pi*result2[i])));
 	}
-	for (int i = 0; i < 6; ++i) {
-		double* rand_num2 = getLGM(1000, seed+i*12345);
-		double* z2 = box_muller(rand_num2, 1000);
-		partb[i] = brownian_motion_path(0.04, 0.18, 88, 10, z2, 1000);
-		partd[i] = brownian_motion_path(0.04, 0.35, 88, 10, z2, 1000);
-	}
+	out[0] = calc_mean(sum1, 10000);
+	out[1] = calc_mean(sum2, 10000);
+	out[2] = calc_mean(sum3, 10000);
+	return out;
 }
 
 double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, int n) {
@@ -371,22 +375,6 @@ double euler_approx(double t, int n, double x0) {
 	return result;
 }
 
-double* question6(int64_t seed) {
-	double out[5];
-	out[0] = 4 * euler_approx(1, 10000, 0);
-	double* rand_num = getLGM(10000, seed);
-	double* mc = monte_carlo(rand_num, 10000, myfunc);
-	out[3] = cov(mc, mc, 10000);
-	out[1] = 4 * calc_mean(mc, 10000);
-	double rand_num2[10000];
-	for (int i = 0; i < 10000; ++i) {
-		rand_num2[i] = 1-pow(rand_num[i], 2.0/3.0)*pow(3.0/2.0,2.0/3.0);
-	}
-	double* mc2 = monte_carlo(rand_num2, 10000, myfunc2);
-	out[2] = 4 * calc_mean(mc2, 10000);
-	out[4] = cov(mc2, mc2, 10000);
-	return out;
-}
 
 double* monte_carlo(double* nums, int n, double (*f)(double)) {
 	double* result = new double[n];
@@ -495,6 +483,23 @@ double heston_model(double rho, double r, double S0, double V0, double sigma, do
 		}
 		out = calc_mean(result, 1000);
 		break;
+	}
+	return out;
+}
+
+double* halton_seq(int base, int num) {
+	double* out = new double[num];
+	double f,r;
+	for (int i = 0; i < num ; ++i) {
+		f = 1;
+		r = 0;
+		int j = i+1;
+		while (j > 0) {
+			f = f / base;
+			r = r + f * (j% base);
+			j = j / base;
+		}
+		out[i] = r;
 	}
 	return out;
 }

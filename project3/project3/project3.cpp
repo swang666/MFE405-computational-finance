@@ -47,19 +47,24 @@ int main()
 		}
 		cout << "\n";
 	}
+	cout << "\n";
 	cout << "Question 4" << endl;
 	double* ques4 = question4(seed);
-	cout << ques4[0] << endl;
-	cout << ques4[1] << endl;
-	cout << ques4[2] << endl;
+	cout << "Reflection " << ques4[0] << endl;
+	cout << "Partial " << ques4[1] << endl;
+	cout << "Full " << ques4[2] << endl << endl;
 	/*ofstream myfile;
 	myfile.open("prices_comp.csv", fstream::out);
 	for (int i = 0; i < 1100; ++i) {
 		myfile << to_string(prices[i]) << "," << to_string(prices_2[i]) << "\n";
 	}
 	myfile.close();*/
-
-
+	cout << "Question 5" << endl;
+	double* ques5 = question5(seed);
+	cout << "base 2,7 " << ques5[0] << endl;
+	cout << "base 2,4 " << ques5[1] << endl;
+	cout << "base 5,7 " << ques5[2] << endl;
+	
 }
 
 

@@ -20,11 +20,10 @@ double* question4(int64_t seed);
 double normalCDF(double x);
 double black_schole(double r, double sigma, double S0, double T, double X);
 double* geometric_brownian_motion(double r, double sigma, double S0, double T, double* nums, int n);
-void question5(int64_t seed, double* parta, double** partb, double* partc, double** partd);
+double* question5(int64_t seed);
 double* brownian_motion_path(double r, double sigma, double S0, double T, double* nums, int n);
 double euler_approx(double t, int n, double x0);
 double myfunc(double x);
-double* question6(int64_t seed);
 double* monte_carlo(double* nums, int n, double(*f)(double));
 double monte_carlo_euro_call(double S0, double T, double X, double r, double sigma, int64_t seed);
 double sim_normalCDF(double x);
@@ -32,4 +31,5 @@ double pdf(double x);
 double* greeks(double S0, double T, double r, double X, double sigma);
 double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t seed);
 double heston_model(double rho, double r, double S0, double V0, double sigma, double alpha, double beta, double T, double K, int type, int64_t seed);
+double* halton_seq(int base, int num);
 #endif //RNG_H
