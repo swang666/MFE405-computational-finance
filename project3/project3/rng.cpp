@@ -176,69 +176,15 @@ double * wiener_process(double* nums, int n, double t) {
 	return w;
 }
 
-double* question3(int64_t seed) {
-	double* rand_num = getLGM(10000, seed);
-	double *z = box_muller(rand_num, 10000);
-	double* w1 = wiener_process(z, 10000, 5);
-	double result[16];
-	double Ea1[10000];
-	double control[10000];
-	for (int i = 0; i < 10000; ++i) {
-		Ea1[i] = w1[i] * w1[i] + sin(w1[i]);
-		control[i] = w1[i] * w1[i];
+void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* parta, double** partc, double** partc_2) {
+	double p1 = monte_carlo_euro_call(S0, T, X, r, sigma, seed);
+	double p2 = black_schole(r, sigma, S0, T, X);
+	parta[0] = p1;
+	parta[1] = p2;
+	for (int i = 0; i < 11; ++i) {
+		partc[i] = greeks(S0 + i, T, r, X, sigma);
+		partc_2[i] = greeks_2(S0 + i, T, r, X, sigma, seed);
 	}
-	result[0] = calc_mean(Ea1, 10000);
-	result[8] = cov(Ea1, Ea1, 10000);
-	double cov_w1_Ea1 = cov(Ea1, control, 10000);
-	double var_w1 = cov(control, control, 10000);
-	double gamma_1 = cov_w1_Ea1 / var_w1;
-
-	double *Ea1_b = vector_minus_v(Ea1, 10000, vector_mult(vector_minus(control, 10000, 5), 10000, gamma_1), false);
-	result[4] = calc_mean(Ea1_b, 10000);
-	result[9] = cov(Ea1_b, Ea1_b, 10000);
-	double* w2 = wiener_process(z, 10000, 0.5);
-	double* w3 = wiener_process(z, 10000, 3.2);
-	double* w4 = wiener_process(z, 10000, 6.5);
-	double Ea2[10000];
-	double Ea3[10000];
-	double Ea4[10000];
-	double con2[10000];
-	double con3[10000];
-	double con4[10000];
-	for (int i = 0; i < 10000; ++i) {
-		Ea2[i] = exp(0.5/2) * cos(w2[i]);
-		Ea3[i] = exp(3.2 / 2) * cos(w3[i]);
-		Ea4[i] = exp(6.5 / 2) * cos(w4[i]);
-		con2[i] = 0.03515 * pow(w2[i], 4) - 0.6 * pow(w2[i],2) + exp(0.25);
-		con3[i] = 0.1356 * pow(w3[i], 4) - 2.34 * pow(w3[i], 2) + exp(1.6);
-		con4[i] = 0.706 * pow(w4[i], 4) - 12.19 * pow(w4[i], 2) + exp(3.25);
-	}
-	double cov_con2_Ea2 = cov(Ea2, con2, 10000);
-	double var_con2 = cov(con2, con2, 10000);
-	double gamma_2 = cov_con2_Ea2 / var_con2;
-	double cov_con3_Ea3 = cov(Ea3, con3, 10000);
-	double var_con3 = cov(con3, con3, 10000);
-	double gamma_3 = cov_con3_Ea3 / var_con3;
-	double cov_con4_Ea4 = cov(Ea4, con4, 10000);
-	double var_con4 = cov(con4, con4, 10000);
-	double gamma_4 = cov_con4_Ea4 / var_con4;
-
-	result[1] = calc_mean(Ea2, 10000);
-	result[10] = cov(Ea2, Ea2, 10000);
-	result[2] = calc_mean(Ea3, 10000);
-	result[11] = cov(Ea3, Ea3, 10000);
-	result[3] = calc_mean(Ea4, 10000);
-	result[12] = cov(Ea4, Ea4, 10000);
-	double* Ea2_b = vector_minus_v(Ea2, 10000, vector_mult(vector_minus(con2, 10000, 0.03515*3*0.5*0.5 - 0.6*0.5+ exp(0.25)), 10000, gamma_2), false);
-	double* Ea3_b = vector_minus_v(Ea3, 10000, vector_mult(vector_minus(con3, 10000, 0.1356 * 3 * 3.2*3.2 - 2.34*3.2 + exp(1.6)), 10000, gamma_3), false);
-	double* Ea4_b = vector_minus_v(Ea4, 10000, vector_mult(vector_minus(con4, 10000, 0.706 * 3 * 6.5*6.5 - 12.19*6.5 + exp(3.25)), 10000, gamma_4), false);
-	result[5] = calc_mean(Ea2_b, 10000);
-	result[13] = cov(Ea2_b, Ea2_b, 10000);
-	result[6] = calc_mean(Ea3_b, 10000);
-	result[14] = cov(Ea3_b, Ea3_b, 10000);
-	result[7] = calc_mean(Ea4_b, 10000);
-	result[15] = cov(Ea4_b, Ea4_b, 10000);
-	return result;
 }
 
 double cov(double* X, double* Y, int n) {
@@ -268,6 +214,36 @@ double* question4(int64_t seed) {
 	out[4] = exp(-0.04 * 10) * cov(p2, p2, 10000);
 	return out;
 }
+
+double monte_carlo_euro_call(double S0, double T, double X, double r, double sigma, int64_t seed) {
+	double result[1000];
+	double* rand_num = getLGM(1000, seed);
+	double* z = box_muller(rand_num, 1000);
+	double* W_T = wiener_process(z, 1000, T);
+	double W_T2[1000];
+	for (int i = 0; i < 1000; ++i) {
+		W_T2[i] = -W_T[i];
+	}
+	double temp, temp2;
+	for (int i = 0; i < 1000; ++i) {
+		temp = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T[i]) - X;
+		temp2 = S0 * exp((r - sigma * sigma / 2)*T + sigma * W_T2[i]) - X;
+		if (temp > 0 && temp2 > 0) {
+			result[i] = (temp + temp2) / 2;
+		}
+		else if (temp > 0) {
+			result[i] = temp / 2;
+		}
+		else if (temp2 > 0) {
+			result[i] = temp2 / 2;
+		}
+		else {
+			result[i] = 0;
+		}
+	}
+	return exp(-r * T)* calc_mean(result, 1000);
+}
+
 
 double* euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic) {
 	double* W_T = wiener_process(nums, n, T);
@@ -312,6 +288,20 @@ double* euro_call(double r, double sigma, double S0, double T, double X, double 
 	return result;
 }
 
+double pdf(double x) {
+	return 1 / sqrt(2 * pi) * exp(-x * x / 2);
+}
+
+double sim_normalCDF(double x) {
+	double d1 = 0.049867347, d2 = 0.0211410061, d3 = 0.0032776263, d4 = 0.0000380036, d5 = 0.0000488906, d6 = 0.000005383;
+	if (x >= 0) {
+		return (1 - 0.5*pow((1 + d1 * x + d2 * pow(x, 2) + d3 * pow(x, 3) + d4 * pow(x, 4) + d5 * pow(x, 5) + d6 * pow(x, 6)),-16));
+	}
+	else {
+		return (0.5*pow((1 + d1 * -x + d2 * pow(-x, 2) + d3 * pow(-x, 3) + d4 * pow(-x, 4) + d5 * pow(-x, 5) + d6 * pow(-x, 6)), -16));
+	}
+}
+
 double normalCDF(double x) 
 {
 	return std::erfc(-x / std::sqrt(2)) / 2;
@@ -320,7 +310,7 @@ double normalCDF(double x)
 double black_schole(double r, double sigma, double S0, double T, double X) {
 	double d1 = (log(S0 / X) + (r + sigma * sigma / 2)*T) / (sigma*sqrt(T));
 	double d2 = d1 - sigma * sqrt(T);
-	return S0 * normalCDF(d1) - X * exp(-r * T) * normalCDF(d2);
+	return S0 * sim_normalCDF(d1) - X * exp(-r * T) * sim_normalCDF(d2);
 }
 
 double* geometric_brownian_motion(double r, double sigma, double S0, double T, double* nums, int n) {
@@ -405,4 +395,38 @@ double* monte_carlo(double* nums, int n, double (*f)(double)) {
 		
 	}
 	return result;
+}
+
+double* greeks(double S0, double T, double r, double X, double sigma) {
+	double* out = new double[5];
+	double d = 0.01;
+	double delta = (black_schole(r, sigma, S0+d, T, X) - black_schole(r, sigma, S0, T, X))/d;
+	out[0] = delta;
+	double gamma = (black_schole(r, sigma, S0 + d, T, X) - 2 * black_schole(r, sigma, S0, T, X) + black_schole(r, sigma, S0 - d, T, X)) / (d*d);
+	out[1] = gamma;
+	double theta = (black_schole(r, sigma, S0, T +d, X) - black_schole(r, sigma, S0, T, X)) / d;
+	out[2] = theta;
+	double vega = (black_schole(r, sigma+ d*0.01, S0, T, X) - black_schole(r, sigma, S0, T, X)) / (d*0.01);
+	out[3] = vega;
+	double rho = (black_schole(r+ d*0.01, sigma, S0, T, X) - black_schole(r, sigma, S0, T, X)) / (d*0.01);
+	out[4] = rho;
+	return out;
+
+}
+
+double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t seed) {
+	double* out = new double[5];
+	double d = 0.01;
+	double delta = (monte_carlo_euro_call(S0+d, T, X, r, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / d;
+	out[0] = delta;
+	double gamma = (monte_carlo_euro_call(S0+d, T, X, r, sigma, seed) - 2 * monte_carlo_euro_call(S0, T, X, r, sigma, seed) + monte_carlo_euro_call(S0-d, T, X, r, sigma, seed)) / (d*d);
+	out[1] = gamma;
+	double theta = (monte_carlo_euro_call(S0, T+d, X, r, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / d;
+	out[2] = theta;
+	double vega = (monte_carlo_euro_call(S0, T, X, r, sigma+ d*0.01, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / (d*0.01);
+	out[3] = vega;
+	double rho = (monte_carlo_euro_call(S0, T, X, r + d*0.01, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / (d*0.01);
+	out[4] = rho;
+	return out;
+
 }

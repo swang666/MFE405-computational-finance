@@ -13,7 +13,7 @@ double* question1(int64_t seed);
 double * generate_bivariate(double * z1, double * z2, int n, double rho);
 double* question2(int64_t seed);
 double * wiener_process(double* nums, int n, double t);
-double* question3(int64_t seed);
+void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* parta, double** partc, double** partc_2);
 double cov(double* X, double* Y, int n);
 double* euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic);
 double* question4(int64_t seed);
@@ -26,5 +26,9 @@ double euler_approx(double t, int n, double x0);
 double myfunc(double x);
 double* question6(int64_t seed);
 double* monte_carlo(double* nums, int n, double(*f)(double));
-
+double monte_carlo_euro_call(double S0, double T, double X, double r, double sigma, int64_t seed);
+double sim_normalCDF(double x);
+double pdf(double x);
+double* greeks(double S0, double T, double r, double X, double sigma);
+double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t seed);
 #endif //RNG_H

@@ -1,8 +1,2 @@
-﻿  rng.cpp
-c:\users\sumen\desktop\ucla\405\project3\project3\rng.cpp(12): warning C4244: 'initializing': conversion from 'double' to 'int64_t', possible loss of data
-c:\users\sumen\desktop\ucla\405\project3\project3\rng.cpp(13): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-c:\users\sumen\desktop\ucla\405\project3\project3\rng.cpp(336): warning C4101: 'out': unreferenced local variable
-c:\users\sumen\desktop\ucla\405\project3\project3\rng.cpp(269): warning C4172: returning address of local variable or temporary: out
-c:\users\sumen\desktop\ucla\405\project3\project3\rng.cpp(241): warning C4172: returning address of local variable or temporary: result
-c:\users\sumen\desktop\ucla\405\project3\project3\rng.cpp(393): warning C4172: returning address of local variable or temporary: out
-  project3.vcxproj -> C:\Users\sumen\Desktop\UCLA\405\project3\Debug\project3.exe
+﻿  project3.cpp
+  project3.vcxproj -> D:\405\MFE405-computational-finance\project3\Debug\project3.exe
