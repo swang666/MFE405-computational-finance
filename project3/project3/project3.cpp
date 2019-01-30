@@ -29,7 +29,9 @@ int main()
 	double* partc[11];
 	double* partc_2[11];
 	double parta[2];
-	question3(seed, 15,0.5,20,0.04,0.25,parta, partc, partc_2);
+	double prices[1100];
+	double prices_2[1100];
+	question3(seed, 15,0.5,20,0.04,0.25, prices, prices_2,parta, partc, partc_2);
 	string greek[5] = { "Delta ", "Gamma ", "Theta ", "Vega ", "Rho " };
 	cout << parta[0] << endl;
 	cout << parta[1] << endl;
@@ -45,6 +47,17 @@ int main()
 		}
 		cout << "\n";
 	}
+	cout << "Question 4" << endl;
+	double* ques4 = question4(seed);
+	cout << ques4[0] << endl;
+	cout << ques4[1] << endl;
+	cout << ques4[2] << endl;
+	/*ofstream myfile;
+	myfile.open("prices_comp.csv", fstream::out);
+	for (int i = 0; i < 1100; ++i) {
+		myfile << to_string(prices[i]) << "," << to_string(prices_2[i]) << "\n";
+	}
+	myfile.close();*/
 
 
 }

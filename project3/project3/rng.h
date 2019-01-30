@@ -13,7 +13,7 @@ double* question1(int64_t seed);
 double * generate_bivariate(double * z1, double * z2, int n, double rho);
 double* question2(int64_t seed);
 double * wiener_process(double* nums, int n, double t);
-void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* parta, double** partc, double** partc_2);
+void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* prices, double* prices_2, double* parta, double** partc, double** partc_2);
 double cov(double* X, double* Y, int n);
 double* euro_call(double r, double sigma, double S0, double T, double X, double *nums, int n, bool antithetic);
 double* question4(int64_t seed);
@@ -31,4 +31,5 @@ double sim_normalCDF(double x);
 double pdf(double x);
 double* greeks(double S0, double T, double r, double X, double sigma);
 double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t seed);
+double heston_model(double rho, double r, double S0, double V0, double sigma, double alpha, double beta, double T, double K, int type, int64_t seed);
 #endif //RNG_H

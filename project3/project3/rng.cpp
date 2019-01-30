@@ -5,6 +5,10 @@
 #include "rng.h"
 #include <cmath>
 #include <iomanip>
+#include <string>
+#include <algorithm>
+
+using namespace std;
 
 const double pi = atan(1) * 4;
 
@@ -176,7 +180,7 @@ double * wiener_process(double* nums, int n, double t) {
 	return w;
 }
 
-void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* parta, double** partc, double** partc_2) {
+void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* prices, double* prices_2, double* parta, double** partc, double** partc_2) {
 	double p1 = monte_carlo_euro_call(S0, T, X, r, sigma, seed);
 	double p2 = black_schole(r, sigma, S0, T, X);
 	parta[0] = p1;
@@ -184,6 +188,11 @@ void question3(int64_t seed, double S0, double T, double X, double r, double sig
 	for (int i = 0; i < 11; ++i) {
 		partc[i] = greeks(S0 + i, T, r, X, sigma);
 		partc_2[i] = greeks_2(S0 + i, T, r, X, sigma, seed);
+	}
+	double d = 0.01;
+	for (int i = 0; i < 1100; ++i) {
+		prices[i] = monte_carlo_euro_call(S0 + i * d, T, X, r, sigma, seed);
+		prices_2[i] = black_schole(r, sigma, S0 + i*d, T, X);
 	}
 }
 
@@ -201,17 +210,13 @@ double cov(double* X, double* Y, int n) {
 }
 
 double* question4(int64_t seed) {
-	//a
-	double out[5];
-	double* rand_num = getLGM(10000, seed);
-	double *z = box_muller(rand_num, 10000);
-	double* p1 = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, false);
-	out[0] = exp(-0.04 * 5)* calc_mean(p1, 10000);
-	out[3] = exp(-0.04 * 10) * cov(p1, p1, 10000);
-	out[1] = black_schole(0.04, 0.2, 88, 5, 100);
-	double* p2 = euro_call(0.04, 0.2, 88, 5, 100, z, 10000, true);
-	out[2] = exp(-0.04 * 5)* calc_mean(p2, 10000);
-	out[4] = exp(-0.04 * 10) * cov(p2, p2, 10000);
+	double* out = new double[3];
+	double reflec = heston_model(-0.6, 0.03, 48, 0.05, 0.42, 5.8, 0.0625, 0.5, 50,0, seed);
+	double p_trun = heston_model(-0.6, 0.03, 48, 0.05, 0.42, 5.8, 0.0625, 0.5, 50,1, seed);
+	double f_trun = heston_model(-0.6, 0.03, 48, 0.05, 0.42, 5.8, 0.0625, 0.5, 50,2, seed);
+	out[0] = exp(-0.03 * 0.5) * reflec;
+	out[1] = exp(-0.03 * 0.5) * p_trun;
+	out[2] = exp(-0.03 * 0.5) * f_trun;
 	return out;
 }
 
@@ -428,5 +433,68 @@ double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t 
 	double rho = (monte_carlo_euro_call(S0, T, X, r + d*0.01, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / (d*0.01);
 	out[4] = rho;
 	return out;
+}
 
+double heston_model(double rho, double r, double S0, double V0, double sigma, double alpha, double beta, double T, double K, int type, int64_t seed) {
+	double out;
+	double* rand_num;
+	double* rand_num2;
+	double* w1;
+	double* w2;
+	double dt = 0.01;
+	int size = T / dt;
+	double* result = new double[1000];
+	double* V = new double[size+1];
+	V[0] = V0;
+	double* S = new double[size + 1];
+	S[0] = S0;
+	switch (type)
+	{
+	case 0:
+		for (int i = 0; i < 1000; ++i) {
+			rand_num = getLGM(size * 2, seed + i * 200);
+			rand_num2 = getLGM(size * 2, seed + 1234 + i * 200);
+			w1 = box_muller(rand_num, size * 2);
+			double* t = box_muller(rand_num2, size * 2);
+			w2 = generate_bivariate(w1, t, size * 2, rho);
+			for (int j = 1; j < size+1; ++j) {
+				V[j] = abs(V[j - 1]) + alpha * (beta - abs(V[j - 1])) * dt + sigma * sqrt(abs(V[j - 1])) * sqrt(dt)*w1[j];
+				S[j] = S[j - 1] + r * S[j - 1] * dt + sqrt(abs(V[j - 1]))*S[j - 1] * sqrt(dt)* w2[j];
+			}
+			result[i] = max(S[size] - K, 0.0);
+		}
+		out = calc_mean(result, 1000);
+		break;
+	case 1:
+		for (int i = 0; i < 1000; ++i) {
+			rand_num = getLGM(size * 2, seed + i * 200);
+			rand_num2 = getLGM(size * 2, seed + 1234 + i * 200);
+			w1 = box_muller(rand_num, size * 2);
+			double* t = box_muller(rand_num2, size * 2);
+			w2 = generate_bivariate(w1, t, size * 2, rho);
+			for (int j = 1; j < size + 1; ++j) {
+				V[j] = V[j - 1] + alpha * (beta - V[j - 1]) * dt + sigma * sqrt(max(V[j-1],0.0)) * sqrt(dt)*w1[j];
+				S[j] = S[j - 1] + r * S[j - 1] * dt + sqrt(max(V[j - 1], 0.0))*S[j - 1] * sqrt(dt)*w2[j];
+			}
+			result[i] = max(S[size] - K, 0.0);
+		}
+		out = calc_mean(result, 1000);
+		break;
+	default:
+		for (int i = 0; i < 1000; ++i) {
+			rand_num = getLGM(size * 2, seed + i * 200);
+			rand_num2 = getLGM(size * 2, seed + 1234 + i * 200);
+			w1 = box_muller(rand_num, size * 2);
+			double* t = box_muller(rand_num2, size * 2);
+			w2 = generate_bivariate(w1, t, size * 2, rho);
+			for (int j = 1; j < size + 1; ++j) {
+				V[j] = V[j - 1] + alpha * (beta - max(V[j - 1], 0.0)) * dt + sigma * sqrt(max(V[j - 1], 0.0)) * sqrt(dt)*w1[j];
+				S[j] = S[j - 1] + r * S[j - 1] * dt + sqrt(max(V[j - 1], 0.0))*S[j - 1] * sqrt(dt)*w2[j];
+			}
+			result[i] = max( S[size] - K , 0.0);
+		}
+		out = calc_mean(result, 1000);
+		break;
+	}
+	return out;
 }
