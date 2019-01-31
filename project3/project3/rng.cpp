@@ -410,16 +410,20 @@ double* greeks(double S0, double T, double r, double X, double sigma) {
 double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t seed) {
 	double* out = new double[5];
 	double d = 0.01;
-	double delta = (monte_carlo_euro_call(S0+d, T, X, r, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / d;
-	out[0] = delta;
-	double gamma = (monte_carlo_euro_call(S0+d, T, X, r, sigma, seed) - 2 * monte_carlo_euro_call(S0, T, X, r, sigma, seed) + monte_carlo_euro_call(S0-d, T, X, r, sigma, seed)) / (d*d);
-	out[1] = gamma;
-	double theta = (monte_carlo_euro_call(S0, T+d, X, r, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / d;
-	out[2] = theta;
-	double vega = (monte_carlo_euro_call(S0, T, X, r, sigma+ d*0.01, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / (d*0.01);
-	out[3] = vega;
-	double rho = (monte_carlo_euro_call(S0, T, X, r + d*0.01, sigma, seed) - monte_carlo_euro_call(S0, T, X, r, sigma, seed)) / (d*0.01);
-	out[4] = rho;
+	double delta[100], gamma[100], theta[100], vega[100], rho[100];
+	for (int i = 0; i < 100; ++i) {
+		delta[i] = (monte_carlo_euro_call(S0 + d, T, X, r, sigma, seed+i) - monte_carlo_euro_call(S0, T, X, r, sigma, seed+i)) / d;
+		gamma[i] = (monte_carlo_euro_call(S0 + d, T, X, r, sigma, seed+i) - 2 * monte_carlo_euro_call(S0, T, X, r, sigma, seed+i) + monte_carlo_euro_call(S0 - d, T, X, r, sigma, seed+i)) / (d*d);
+
+		theta[i] = (monte_carlo_euro_call(S0, T + d, X, r, sigma, seed+i) - monte_carlo_euro_call(S0, T, X, r, sigma, seed+i)) / d;
+		vega[i] = (monte_carlo_euro_call(S0, T, X, r, sigma + d * 0.01, seed+i) - monte_carlo_euro_call(S0, T, X, r, sigma, seed+i)) / (d*0.01);
+		rho[i] = (monte_carlo_euro_call(S0, T, X, r + d * 0.01, sigma, seed+i) - monte_carlo_euro_call(S0, T, X, r, sigma, seed+i)) / (d*0.01);
+	}
+	out[0] = calc_mean(delta, 100);
+	out[1] = calc_mean(gamma, 100);
+	out[2] = calc_mean(theta, 100);
+	out[3] = calc_mean(vega, 100);
+	out[4] = calc_mean(rho, 100);
 	return out;
 }
 

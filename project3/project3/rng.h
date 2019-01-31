@@ -32,4 +32,5 @@ double* greeks(double S0, double T, double r, double X, double sigma);
 double* greeks_2(double S0, double T, double r, double X, double sigma, int64_t seed);
 double heston_model(double rho, double r, double S0, double V0, double sigma, double alpha, double beta, double T, double K, int type, int64_t seed);
 double* halton_seq(int base, int num);
+
 #endif //RNG_H

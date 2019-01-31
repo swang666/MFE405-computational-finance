@@ -64,7 +64,6 @@ int main()
 	cout << "base 2,7 " << ques5[0] << endl;
 	cout << "base 2,4 " << ques5[1] << endl;
 	cout << "base 5,7 " << ques5[2] << endl;
-	
 }
 
 
