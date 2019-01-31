@@ -180,12 +180,10 @@ double * wiener_process(double* nums, int n, double t) {
 	return w;
 }
 
-void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* prices, double* prices_2, double* parta, double** partc, double** partc_2) {
-	double p1 = monte_carlo_euro_call(S0, T, X, r, sigma, seed);
-	double p2 = black_schole(r, sigma, S0, T, X);
-	parta[0] = p1;
-	parta[1] = p2;
+void question3(int64_t seed, double S0, double T, double X, double r, double sigma, double* prices, double* prices_2, double* parta, double* partb, double** partc, double** partc_2) {
 	for (int i = 0; i < 11; ++i) {
+		parta[i] = monte_carlo_euro_call(S0+ i, T, X, r, sigma, seed);
+		partb[i] = black_schole(r, sigma, S0+i, T, X);
 		partc[i] = greeks(S0 + i, T, r, X, sigma);
 		partc_2[i] = greeks_2(S0 + i, T, r, X, sigma, seed);
 	}
@@ -327,8 +325,21 @@ double* geometric_brownian_motion(double r, double sigma, double S0, double T, d
 	return result;
 }
 
-double* question5(int64_t seed) {
+double* question5(int64_t seed, double* parta, double* partb, double* partc) {
 	double* out = new double[3];
+	double* temp1 = getLGM(200, seed);
+	double* temp2 = halton_seq(2, 100);
+	double* temp3 = halton_seq(4, 100);
+	double* temp4 = halton_seq(7, 100);
+	for (int i = 0; i < 100; ++i) {
+		parta[i] = temp1[i];
+		partb[i] = temp2[i];
+		partc[i] = temp2[i];
+		parta[100 + i] = temp1[100 + i];
+		partb[100 + i] = temp4[i];
+		partc[100 + i] = temp3[i];
+	}
+	
 	double* result = halton_seq(2, 10000);
 	double* result2 = halton_seq(7, 10000);
 	double* result3 = halton_seq(4, 10000);

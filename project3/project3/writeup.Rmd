@@ -1,0 +1,50 @@
+---
+title: "Project 3"
+author: "Sumeng Wang"
+date: "January 30, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(reshape2)
+```
+
+##Question 3 Graphs of the Greeks
+```{r fig.height= 3.5}
+df = read.csv("greeks.csv")
+S0=seq(15,25,1)
+ggplot(data=df,aes(y=delta,x=S0))+
+  geom_line()
+ggplot(data=df,aes(y=gamma,x=S0))+
+  geom_line()
+ggplot(data=df,aes(y=theta,x=S0))+
+  geom_line()
+ggplot(data=df,aes(y=vega,x=S0))+
+  geom_line()
+ggplot(data=df,aes(y=rho,x=S0))+
+  geom_line()
+```
+
+##Question 5 Graphs of the Halton sequences
+```{r fig.height=3.5}
+df = read.csv("halton.csv")
+index = seq(1,100,1)
+df1 = cbind(df[,1:2], index)
+names(df1) = c("U1", "U2", "index")
+df1 = melt(df1, id = 'index')
+ggplot(data = df1, aes(x = index, y = value, colour = variable)) +
+  geom_point() + ggtitle("U(0,1) * U(0,1)")
+df2 = cbind(df[,3:4], index)
+names(df2) = c("H2", "H7", "index")
+df2 = melt(df2, id = 'index')
+ggplot(data = df2, aes(x = index, y = value, colour = variable)) +
+  geom_point()+ ggtitle("H2 * H7")
+df3 = cbind(df[,5:6], index)
+names(df3) = c("H2", "H4", "index")
+df3 = melt(df3, id = 'index')
+ggplot(data = df3, aes(x = index, y = value, colour = variable)) +
+  geom_point()+ ggtitle("H2 * H4")
+```
+As we can see from the above figures, 2 unifrom distribution seems to be independent. $H_2$ and $H_7$ are somewhat correlated. $H_2$ and $H_4$ are strongly correlated.
