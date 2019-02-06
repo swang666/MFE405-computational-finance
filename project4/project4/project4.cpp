@@ -30,5 +30,43 @@ int main()
 	for (int i = 0; i < 7; ++i) {
 		cout << ques1[3][i] << endl;
 	}
-	
+	cout << endl;
+	cout << "Question 2" << endl;
+	cout << question2() << endl << endl;
+	cout << "Question 3" << endl;
+	double** ques3 = question3();
+	for (int i = 0; i < 31; ++i) {
+		cout << ques3[0][i] << " ";
+	}
+	cout << endl << endl;
+	for (int i = 0; i < 31; ++i) {
+		cout << ques3[1][i] << " ";
+	}
+	cout << endl << endl;
+	for (int i = 0; i < 31; ++i) {
+		cout << ques3[2][i] << " ";
+	}
+	cout << endl << endl;
+	for (int i = 0; i < 31; ++i) {
+		cout << ques3[3][i] << " ";
+	}
+	cout << endl << endl;
+	for (int i = 0; i < 31; ++i) {
+		cout << ques3[4][i] << " ";
+	}
+	cout << endl << endl;
+	for (int i = 0; i < 38; ++i) {
+		cout << ques3[5][i] << " ";
+	}
+	cout << endl << endl;
+	cout << "Question 4" << endl;
+	double** ques4 = question4();
+	for (int i = 0; i < 11; ++i) {
+		cout << ques4[0][i] << " ";
+	}
+	cout << endl << endl;
+	for (int i = 0; i < 11; ++i) {
+		cout << ques4[1][i] << " ";
+	}
+	cout << endl << endl;
 }
