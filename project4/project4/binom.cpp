@@ -154,6 +154,41 @@ double** question4() {
 	return out;
 }
 
+double** question5() {
+	double T = 0.5;
+	double dt, u, d, pu, pd, pm;
+	double r = 0.05;
+	double sigma = 0.24;
+	double S0 = 32;
+	double K = 30;
+	int N[9] = { 10, 15, 20, 40, 70, 80, 100, 200, 500 };
+	double** out = new double*[2];
+	for (int j = 0; j < 2; ++j) {
+		out[j] = new double[9];
+	}
+	for (int i = 0; i < 9; ++i) {
+		dt = T / N[i];
+		d = exp(-sigma * sqrt(3 * dt));
+		u = 1 / d;
+		pu = (r*dt*(1 - d) + r * r*dt*dt + sigma * sigma*dt) / ((u - d)*(u - 1));
+		pd = (r*dt*(1 - u) + r * r*dt*dt + sigma * sigma*dt) / ((u - d)*(1 - d));
+		pm = 1 - pu - pd;
+		out[0][i] = trinomial_method(S0, K, u, d, pu, pd, pm, N[i], T, r);
+	}
+	for (int i = 0; i < 9; ++i) {
+		dt = T / N[i];
+		d = exp(-sigma * sqrt(3 * dt));
+		u = 1 / d;
+		double delta_Xd = log(d);
+		double delta_Xu = log(u);
+		pu = 0.5*((sigma*sigma*dt + (r - sigma * sigma / 2)*(r - sigma * sigma / 2)*dt*dt) / (delta_Xu*delta_Xu) + (r - sigma * sigma / 2)*dt / delta_Xu);
+		pd = 0.5*((sigma*sigma*dt + (r - sigma * sigma / 2)*(r - sigma * sigma / 2)*dt*dt) / (delta_Xu*delta_Xu) - (r - sigma * sigma / 2)*dt / delta_Xu);
+		pm = 1 - pu - pd;
+		out[1][i] = trinomial_method2(log(S0), K, delta_Xu, delta_Xd, pu, pd, pm, N[i], T, r);
+	}
+	return out;
+}
+
 double binom_method2(double S0, double K, double u, double d, double p, int n, double T, double r, int type, int put) {
 	double h = T / n;
 	double** prices = new double*[n+1];
@@ -202,4 +237,60 @@ double* JR_Btree(double r, double sigma, double dt) {
 	out[1] = exp((r - sigma * sigma / 2)*dt - sigma * sqrt(dt));
 	out[2] = 0.5;
 	return out;
+}
+
+double trinomial_method(double S0, double K, double u, double d, double pu, double pd, double pm, int n, double T, double r) {
+	double h = T / n;
+	double** prices = new double*[n + 1];
+	double** payoffs = new double*[n + 1];
+	for (int i = n; i >= 0; --i) {
+		prices[i] = new double[2*n + 1];
+		payoffs[i] = new double[2*n + 1];
+
+		for (int j = 0; j < 2* i+ 1; ++j) {
+			if (j <= i)
+				prices[i][j] = S0 * pow(u, (i - j));
+			else
+				prices[i][j] = S0 * pow(d, (j-i));
+			if (i == n) {
+				//initialize final payoff
+				payoffs[i][j] = max(prices[i][j] - K, 0.0);
+
+			}
+			else {
+				payoffs[i][j] = exp(-r * h)*(payoffs[i + 1][j] * pu + payoffs[i + 1][j + 1] * pm + payoffs[i+1][j+2] * pd);
+				//payoffs(j, i) = exp(-r * h)* (payoffs(j, i + 1)*(exp(r*h) - d) / (u - d) + payoffs(j + 1, i + 1)*(u - exp(r*h)) / (u - d));
+			}
+			//cout << i << " " << payoffs[i][j] << endl;
+		}
+	}
+	return payoffs[0][0];
+}
+
+double trinomial_method2(double X0, double K, double delta_Xu, double delta_Xd, double pu, double pd, double pm, int n, double T, double r) {
+	double h = T / n;
+	double** prices = new double*[n + 1];
+	double** payoffs = new double*[n + 1];
+	for (int i = n; i >= 0; --i) {
+		prices[i] = new double[2 * n + 1];
+		payoffs[i] = new double[2 * n + 1];
+
+		for (int j = 0; j < 2 * i + 1; ++j) {
+			if (j <= i)
+				prices[i][j] = X0 + delta_Xu* (i - j);
+			else
+				prices[i][j] = X0 + delta_Xd* (j - i);
+			if (i == n) {
+				//initialize final payoff
+				payoffs[i][j] = max(exp(prices[i][j]) - K, 0.0);
+
+			}
+			else {
+				payoffs[i][j] = exp(-r * h)*(payoffs[i + 1][j] * pu + payoffs[i + 1][j + 1] * pm + payoffs[i + 1][j + 2] * pd);
+				//payoffs(j, i) = exp(-r * h)* (payoffs(j, i + 1)*(exp(r*h) - d) / (u - d) + payoffs(j + 1, i + 1)*(u - exp(r*h)) / (u - d));
+			}
+			//cout << i << " " << payoffs[i][j] << endl;
+		}
+	}
+	return payoffs[0][0];
 }

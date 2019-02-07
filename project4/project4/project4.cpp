@@ -69,4 +69,14 @@ int main()
 		cout << ques4[1][i] << " ";
 	}
 	cout << endl << endl;
+	cout << "Question 5" << endl;
+	double** ques5 = question5();
+	cout << "5a" << endl;
+	for (int i = 0; i < 9; ++i) {
+		cout << ques5[0][i] << endl;
+	}
+	cout << "5b" << endl;
+	for (int i = 0; i < 9; ++i) {
+		cout << ques5[1][i] << endl;
+	}
 }

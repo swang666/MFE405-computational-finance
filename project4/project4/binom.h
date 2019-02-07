@@ -6,6 +6,9 @@ double** question1();
 double question2();
 double** question3();
 double** question4();
+double** question5();
 double binom_method2(double S0, double K, double u, double d, double p, int n, double T, double r, int type, int put);
 double* JR_Btree(double r, double sigma, double dt);
+double trinomial_method(double S0, double K, double u, double d, double pu, double pd, double pm, int n, double T, double r);
+double trinomial_method2(double X0, double K, double delta_Xu, double delta_Xd, double pu, double pd, double pm, int n, double T, double r);
 #endif //BINOM_H
