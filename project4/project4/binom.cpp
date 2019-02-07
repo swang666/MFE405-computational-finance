@@ -10,6 +10,8 @@
 
 using namespace std;
 
+const double pi = atan(1) * 4;
+
 double** question1() {
 	double T = 0.5;
 	double dt, c, u, d, p;
@@ -189,6 +191,11 @@ double** question5() {
 	return out;
 }
 
+double question6() {
+	double out = halton_euro_call(32, 30, 0.5, 0.05, 0.24, 1000, 2, 5);
+	return out;
+}
+
 double binom_method2(double S0, double K, double u, double d, double p, int n, double T, double r, int type, int put) {
 	double h = T / n;
 	double** prices = new double*[n+1];
@@ -293,4 +300,53 @@ double trinomial_method2(double X0, double K, double delta_Xu, double delta_Xd, 
 		}
 	}
 	return payoffs[0][0];
+}
+
+double* halton_seq(int base, int num) {
+	double* out = new double[num];
+	double f, r;
+	for (int i = 0; i < num; ++i) {
+		f = 1;
+		r = 0;
+		int j = i + 1;
+		while (j > 0) {
+			f = f / base;
+			r = r + f * (j% base);
+			j = j / base;
+		}
+		out[i] = r;
+	}
+	return out;
+}
+
+double * box_muller(double *nums1, double* nums2, int n) {
+	double z1, z2;
+	double *std_norm = new double[2*n];
+	for (int i = 0; i < n; ++i) {
+		z1 = sqrt(-2 * log(nums1[i]))* cos(2 * pi * nums2[i]);
+		z2 = sqrt(-2 * log(nums1[i]))* sin(2 * pi * nums2[i]);
+		std_norm[2*i] = z1;
+		std_norm[2*i + 1] = z2;
+	}
+	return std_norm;
+}
+
+double halton_euro_call(double S0, double K, double T, double r, double sigma, int n, int b1, int b2) {
+	double* seq1 = halton_seq(b1, n);
+	double* seq2 = halton_seq(b2, n);
+	double* rnorm = box_muller(seq1, seq2, n);
+	double* out = new double[2*n];
+	for (int i = 0; i < 2*n; ++i) {
+		out[i] = max(0.0, S0 * exp((r - sigma * sigma / 2)*T + sigma * sqrt(T)*rnorm[i]) - K);
+	}
+	return exp(-r * T)* calc_mean(out, 2*n);
+}
+
+double calc_mean(double *nums, int n) {
+	double sum_of_mean = 0;
+	for (int i = 0;i < n;++i) {
+		sum_of_mean = sum_of_mean + nums[i];
+	}
+	double mean = sum_of_mean / n;
+	return mean;
 }

@@ -79,4 +79,8 @@ int main()
 	for (int i = 0; i < 9; ++i) {
 		cout << ques5[1][i] << endl;
 	}
+	cout << endl;
+	double ques6 = question6();
+	cout << "Question 6" << endl;
+	cout << ques6 << endl;
 }
