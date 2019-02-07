@@ -1,0 +1,8 @@
+# filename: readme
+# author: Sumeng Wang
+
+binom.h binom.cpp contains all essential functions
+
+project4.cpp returns the output of the questions
+
+writeup.pdf contains the graph and comments
