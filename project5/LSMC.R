@@ -65,14 +65,16 @@ LSMC = function (N, t, K, S0, r, sigma, num, k, FUN){
       B[a,1] = sum(FUN(x_clean,a) * y_clean)
       X = cbind(X, FUN(x, a))
     }
-    reg = solve(A,B)
-    continuation = X %*% reg * temp
-    newCF = apply(cbind(K - paths[,i+1], zeros), 1, max)
-
-    for (j in 1: num){
-      if (newCF[j] > continuation[j]){
-        CF[j, ] = zeros_row
-        CF[j,i] = newCF[j]
+    if (length(x_clean) >= 2){
+      reg = chol2inv(chol(A))%*%B
+      continuation = X %*% reg * temp
+      newCF = apply(cbind(K - paths[,i+1], zeros), 1, max)
+      
+      for (j in 1: num){
+        if (newCF[j] > continuation[j]){
+          CF[j, ] = zeros_row
+          CF[j,i] = newCF[j]
+        }
       }
     }
   }
@@ -132,15 +134,17 @@ LSMC_us = function (N, t, Kt, S0, r, sigma, num, k, FUN){
       B[a,1] = sum(FUN(x_clean,a) * y_clean)
       X = cbind(X, FUN(x, a))
     }
-    reg = solve(A,B)
-    continuation = X %*% reg * temp
-    newCF = apply(cbind(K - paths[,i+1], zeros), 1, max)
-    
-    for (j in 1: num){
-      if (newCF[j] > continuation[j]){
-        CF[j, ] = zeros_row
-        CF[j,i] = newCF[j]
+    if (length(x_clean) >= 2){
+      reg = solve(A,B)
+      continuation = X %*% reg * temp
+      newCF = apply(cbind(K - paths[,i+1], zeros), 1, max)
+      
+      for (j in 1: num){
+        if (newCF[j] > continuation[j]){
+         CF[j, ] = zeros_row
+         CF[j,i] = newCF[j]
       }
+     }
     }
   }
   D = exp(seq(-r*strike_date*dt,-(N)*r*dt, -r*dt))
@@ -148,14 +152,16 @@ LSMC_us = function (N, t, Kt, S0, r, sigma, num, k, FUN){
 }
 
 N = 250
-S0 = 40
+S0 = 44
 r = 0.06
 sigma = 0.2
 K = 40
 t = 0.5
-num = 100000
-k = 3
+num = 10000
+k = 2
 out = LSMC(N, t, K, S0, r, sigma, num, k, Monomial)
+out1 = LSMC(N, t, K, S0, r, sigma, num, k+1, Monomial)
+out2 = LSMC(N, t, K, S0, r, sigma, num, k+2, Monomial)
 #out2 = LSMC(N, t, K, S0, r, sigma, num, k, Hermit)
 #out3 = LSMC(N, t, K, S0, r, sigma, num, k, Lagur)
 
@@ -167,6 +173,6 @@ Kt = 0.2
 t = 1
 num = 100000
 k = 3
-out4 = LSMC_eu(N, t, Kt, S0, r, sigma, num)
+#out4 = LSMC_eu(N, t, Kt, S0, r, sigma, num)
 
-out5 = LSMC_us(N, t, Kt, S0, r, sigma, num, k, Monomial)
+#out5 = LSMC_us(N, t, Kt, S0, r, sigma, num, k, Monomial)
