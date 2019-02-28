@@ -29,9 +29,10 @@ int main()
 
 	cout << "EFDM American put" << endl;
 	cout << "ds = 0.25: " << EFDM_S(10, 0.25, 1, 0) << endl;
-	//cout << "ds = 1: " << EFDM_S(10, 1, 1, 0) << endl;
-	//cout << "ds = 1.25: " << EFDM_S(10, 1.25, 1, 0) << endl;
-
+	cout << "ds = 1: " << EFDM_S(10, 1, 1, 0) << endl;
+	cout << "ds = 1.25: " << EFDM_S(10, 1.25, 1, 0) << endl;
+	cout << "EFDM American call" << endl;
+	cout << "ds = 0.25: " << EFDM_S(10, 0.25, 1, 1) << endl;
 	/*cout << "IFDM American put" << endl;
 	cout << "k = 1: " << IFDM(10, 1, 0, 0) << endl;
 	cout << "k = 3: " << IFDM(10, 3, 0, 0) << endl;

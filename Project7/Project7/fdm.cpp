@@ -268,7 +268,6 @@ double EFDM_S(double S0, double dS, double alpha, int call) {
 	double Smin = 4;
 
 	int num_path = S0/ dS;
-	cout << num_path << endl;
 	int total_num_path = 2 * num_path + 1;
 	VectorXd SN = VectorXd::Zero(total_num_path);
 	VectorXd FN(total_num_path);
@@ -281,16 +280,11 @@ double EFDM_S(double S0, double dS, double alpha, int call) {
 	}
 	else {
 		// call option
-		for (int i = num_path; i < 2 * num_path + 1; ++i) {
-			SN(i) = S0 - (i - num_path) * dS;
-			FN(i) = max(-K + SN(i), 0.0);
-		}
-		for (int i = num_path - 1; i >= 0; --i) {
-			SN(i) = S0 + (num_path - i) * dS;
+		for (int i = 0; i < total_num_path; ++i) {
+			SN(i) = (total_num_path - 1 - i) * dS;
 			FN(i) = max(-K + SN(i), 0.0);
 		}
 	}
-	cout << SN(num_path) << endl;
 	
 	MatrixXd A = MatrixXd::Zero(total_num_path, total_num_path);
 	MatrixXd Ad = MatrixXd::Zero(total_num_path, total_num_path);
@@ -318,8 +312,6 @@ double EFDM_S(double S0, double dS, double alpha, int call) {
 		Ad(i, i + 1) = -(-r * j*(alpha) / 2 + sigma * sigma*j*j*(alpha) / 2);
 
 	}
-	cout << Ad(num_path, num_path + 1);
-
 
 	VectorXd Di = Ad * FN;
 	
@@ -328,14 +320,25 @@ double EFDM_S(double S0, double dS, double alpha, int call) {
 	VectorXd Ci;
 	for (int i = 0; i < N; ++i) {
 		temp = Di;
-		temp(0) = 0;
-		temp(total_num_path - 1) = -SN(total_num_path-1) + SN(total_num_path-2);
-		Ci = Ainv * temp;
+		if (call == 0) {
+			temp(0) = 0;
+			temp(total_num_path - 1) = -SN(total_num_path - 1) + SN(total_num_path - 2);
+			Ci = Ainv * temp;
+			for (int j = 0; j < total_num_path; ++j) {
+				Ci(j) = max(Ci(j), K - SN(j));
+			}
+		}
+		else {
+			temp(0) = SN(0) - SN(1);
+			temp(total_num_path - 1) = 0;
+			Ci = Ainv * temp;
+			for (int j = 0; j < total_num_path; ++j) {
+				Ci(j) = max(Ci(j), -K + SN(j));
+			}
+		}
 		//cout << Ci << endl;
 		Di = Ad * Ci;
 	}
-	cout << Ci << endl;
-	cout << SN << endl;
 	return Ci(num_path);
 
 }
