@@ -12,7 +12,7 @@
 using namespace std;
 using namespace Eigen;
 
-double EFDM(double S0, int k, int euro, int call) {
+MatrixXd EFDM(double S0, int k, int euro, int call) {
 	double sigma = 0.2;
 	double T = 0.5;
 	double K = 10;
@@ -25,18 +25,22 @@ double EFDM(double S0, int k, int euro, int call) {
 	double pu = dt * (sigma*sigma / (2 * dx*dx) + (r - sigma * sigma / 2) / (2 * dx));
 	double pm = 1 - dt * sigma*sigma / (dx*dx) - r * dt;
 	double pd = dt * (sigma*sigma / (2 * dx*dx) - (r - sigma * sigma / 2) / (2 * dx));
-	int num_path = (log(S0) - log(Smin)) / dx;
+	int num_path;
+	num_path = (log(S0) - log(Smin)) / dx;
 	int total_num_path = 2 * num_path + 1;
 	VectorXd XN = VectorXd::Zero(total_num_path);
+	VectorXd SN = VectorXd::Zero(total_num_path);
 	VectorXd FN(total_num_path);
 	if (call == 0) {
 		// put option
 		for (int i = num_path; i < 2 * num_path + 1; ++i) {
 			XN(i) = log(S0) - (i - num_path) * dx;
+			SN(i) = exp(XN(i));
 			FN(i) = max(K - exp(XN(i)), 0.0);
 		}
 		for (int i = num_path - 1; i >= 0; --i) {
 			XN(i) = log(S0) + (num_path - i) * dx;
+			SN(i) = exp(XN(i));
 			FN(i) = max(K - exp(XN(i)), 0.0);
 		}
 	}
@@ -44,13 +48,16 @@ double EFDM(double S0, int k, int euro, int call) {
 		// call option
 		for (int i = num_path; i < 2 * num_path + 1; ++i) {
 			XN(i) = log(S0) - (i - num_path) * dx;
+			SN(i) = exp(XN(i));
 			FN(i) = max(-K + exp(XN(i)), 0.0);
 		}
 		for (int i = num_path - 1; i >= 0; --i) {
 			XN(i) = log(S0) + (num_path - i) * dx;
+			SN(i) = exp(XN(i));
 			FN(i) = max(-K + exp(XN(i)), 0.0);
 		}
 	}
+	
 	MatrixXd A = MatrixXd::Zero(total_num_path, total_num_path);
 	
 	A(0,0) = pu;
@@ -98,10 +105,13 @@ double EFDM(double S0, int k, int euro, int call) {
 			Fi = temp;
 		}
 	}
-	return Fi(num_path);
+	MatrixXd out(total_num_path, 2);
+	out.block(0, 0, total_num_path, 1) = SN;
+	out.block(0, 1, total_num_path, 1) = Fi;
+	return out;
 }
 
-double IFDM(double S0, int k, int euro, int call) {
+MatrixXd IFDM(double S0, int k, int euro, int call) {
 	double sigma = 0.2;
 	double T = 0.5;
 	double K = 10;
@@ -117,15 +127,18 @@ double IFDM(double S0, int k, int euro, int call) {
 	int num_path = (log(S0) - log(Smin)) / dx;
 	int total_num_path = 2 * num_path + 1;
 	VectorXd XN = VectorXd::Zero(total_num_path);
+	VectorXd SN = VectorXd::Zero(total_num_path);
 	VectorXd BN(total_num_path);
 
 	if (call == 0) {
 		for (int i = num_path; i < 2 * num_path + 1; ++i) {
 			XN(i) = log(S0) - (i - num_path) * dx;
+			SN(i) = exp(XN(i));
 			BN(i) = max(K - exp(XN(i)), 0.0);
 		}
 		for (int i = num_path - 1; i >= 0; --i) {
 			XN(i) = log(S0) + (num_path - i) * dx;
+			SN(i) = exp(XN(i));
 			BN(i) = max(K - exp(XN(i)), 0.0);
 		}
 		BN(0) = 0;
@@ -134,10 +147,12 @@ double IFDM(double S0, int k, int euro, int call) {
 	else {
 		for (int i = num_path; i < 2 * num_path + 1; ++i) {
 			XN(i) = log(S0) - (i - num_path) * dx;
+			SN(i) = exp(XN(i));
 			BN(i) = max(-K + exp(XN(i)), 0.0);
 		}
 		for (int i = num_path - 1; i >= 0; --i) {
 			XN(i) = log(S0) + (num_path - i) * dx;
+			SN(i) = exp(XN(i));
 			BN(i) = max(-K + exp(XN(i)), 0.0);
 		}
 		BN(0) = exp(XN(0)) - exp(XN(1));
@@ -193,10 +208,13 @@ double IFDM(double S0, int k, int euro, int call) {
 			Fi = Ainv * temp;
 		}
 	}
-	return Fi(num_path);
+	MatrixXd out(total_num_path, 2);
+	out.block(0, 0, total_num_path, 1) = SN;
+	out.block(0, 1, total_num_path, 1) = Fi;
+	return out;
 }
 
-double CNFDM(double S0, int k) {
+MatrixXd CNFDM(double S0, int k) {
 	double sigma = 0.2;
 	double T = 0.5;
 	double K = 10;
@@ -212,13 +230,16 @@ double CNFDM(double S0, int k) {
 	int num_path = (log(S0) - log(Smin)) / dx;
 	int total_num_path = 2 * num_path + 1;
 	VectorXd XN = VectorXd::Zero(total_num_path);
+	VectorXd SN = VectorXd::Zero(total_num_path);
 	VectorXd CN(total_num_path);
 	for (int i = num_path; i < 2 * num_path + 1; ++i) {
 		XN(i) = log(S0) - (i - num_path) * dx;
+		SN(i) = exp(XN(i));
 		CN(i) = max(K - exp(XN(i)), 0.0);
 	}
 	for (int i = num_path - 1; i >= 0; --i) {
 		XN(i) = log(S0) + (num_path - i) * dx;
+		SN(i) = exp(XN(i));
 		CN(i) = max(K - exp(XN(i)), 0.0);
 	}
 
@@ -253,10 +274,13 @@ double CNFDM(double S0, int k) {
 		Ci = Ainv * temp;
 		Zi = Az * Ci;
 	}
-	return Ci(num_path);
+	MatrixXd out(total_num_path, 2);
+	out.block(0, 0, total_num_path, 1) = SN;
+	out.block(0, 1, total_num_path, 1) = Ci;
+	return out;
 }
 
-double EFDM_S(double S0, double dS, double alpha, int call) {
+MatrixXd GFD(double S0, double dS, double alpha, int call) {
 	double sigma = 0.2;
 	double T = 0.5;
 	double K = 10;
@@ -339,6 +363,9 @@ double EFDM_S(double S0, double dS, double alpha, int call) {
 		//cout << Ci << endl;
 		Di = Ad * Ci;
 	}
-	return Ci(num_path);
+	MatrixXd out(total_num_path, 2);
+	out.block(0, 0, total_num_path, 1) = SN;
+	out.block(0, 1, total_num_path, 1) = Ci;
+	return out;
 
 }

@@ -1,10 +1,12 @@
 #ifndef FDM_H
 #define FDM_H
 #include <stdint.h>
+#include <Eigen>
 
+using namespace Eigen;
 
-double EFDM(double S0, int k, int euro, int call);
-double IFDM(double S0, int k, int euro, int call);
-double CNFDM(double S0, int k);
-double EFDM_S(double S0, double dS, double alpha, int call);
+MatrixXd EFDM(double S0, int k, int euro, int call);
+MatrixXd IFDM(double S0, int k, int euro, int call);
+MatrixXd CNFDM(double S0, int k);
+MatrixXd GFD(double S0, double dS, double alpha, int call);
 #endif //FDM_H
