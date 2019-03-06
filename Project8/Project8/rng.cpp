@@ -103,26 +103,47 @@ double vasicek_model_zero_bond(double r0, double sigma, double K, double r_bar, 
 
 double cir_model_zero_bond(double r0, double sigma, double K, double strike, double r_bar, double V, double T, double S, double t, int64_t seed) {
 
-	double* result = new double[10000];
-	int n = 252;
-	double dt = (S - t) / n;
-	cout << dt << endl;
-	for (int j = 0; j < 10000; ++j) {
-		double* rs = new double[n + 1];
-		rs[0] = r0;
-		double* rand_num = getLGM(n, seed + j * 1000);
-		double* z = box_muller(rand_num, n);
-		for (int i = 1; i < n + 1; ++i) {
-			rs[i] = rs[i - 1] + K * (r_bar - rs[i - 1])*dt + sigma * sqrt(rs[i-1])*sqrt(dt)*z[i - 1];
+	int num1 = 1000;
+	int num2 = 1000;
+	double* callprice = new double[num1];
+	for (int k = 0; k < num1; ++k) {
+		int count = 0;
+		double* Payoff = new double[num2];
+		int n = 252;
+		double dt = (S - t) / n;
+		double* rT = new double[n/2 + 1];
+		rT[0] = r0;
+		double* rand_num = getLGM(n*600, seed + (k+1) * 20);
+		double* z = box_muller(rand_num, n*600);
+
+		for (int i = 1; i < n / 2 + 1; ++i) {
+			rT[i] = rT[i - 1] + K * (r_bar - rT[i - 1])*dt + sigma * sqrt(rT[i - 1])*sqrt(dt)*z[i - 1 + count * n/2];
 		}
-		double P_TS = 1000 * exp(-trapzoid_method(n/2, n, rs, dt));
-		double c = exp(-trapzoid_method(0, n/2, rs, dt)) * max(P_TS - strike, 0.0);
-		result[j] = c;
+		//cout << z[1] << endl;
+		++count;
+		for (int j = 0; j < num2; ++j) {
+			double* rS = new double[n/2 + 1];
+			rS[0] = rT[n/2];
+			for (int i = 1; i < n / 2 + 1; ++i) {
+				rS[i] = rS[i - 1] + K * (r_bar - rS[i - 1])*dt + sigma * sqrt(abs(rS[i - 1]))*sqrt(dt)*z[i - 1+ count * n / 2];
+			}
+			++count;	
+			
+			double P_TS = 1000 * exp(-trapzoid_method(0, n/2, rS, dt));
+				
+			//double c = exp(-trapzoid_method(0, n / 2, rT, dt)) * max(P_TS - strike, 0.0);
+			Payoff[j] = max(P_TS - strike, 0.0);
+			delete[] rS;
+		}
+		//cout << calc_mean(Payoff, 1000) << endl;
+			
+		callprice[k] = exp(-trapzoid_method(0, n / 2, rT, dt)) * calc_mean(Payoff, num2);
 		delete[] rand_num;
 		delete[] z;
-		delete[] rs;
+		delete[] Payoff;
+		delete[] rT;
 	}
-	return calc_mean(result, 10000);
+	return calc_mean(callprice, num1);
 }
 
 void cir_explicit(double r0, double sigma, double K, double strike, double r_bar, double V, double T, double S, double t) {
@@ -133,7 +154,6 @@ void cir_explicit(double r0, double sigma, double K, double strike, double r_bar
 	double A_TS = pow((h1*exp(h2*(S - T))) / (h2*(exp(h1*(S - T)) - 1) + h1), h3);
 	double B_TS = (exp(h1*(S - T)) - 1) / (h2*(exp(h1*(S - T)) - 1) + h1);
 	double P_TS = A_TS * exp(-B_TS * r_S);
-
 	double A_tS = pow((h1*exp(h2*(S - t))) / (h2*(exp(h1*(S - t)) - 1) + h1), h3);
 	double B_tS = (exp(h1*(S - t)) - 1) / (h2*(exp(h1*(S - t)) - 1) + h1);
 	double P_tS = A_tS * exp(-B_tS * r0);

@@ -15,6 +15,6 @@ int main()
 {
 
 	//cout << vasicek_model_zero_bond(0.05, 0.18, 0.82, 0.05, 1000, 0.5, 0, 123456) << endl;
-	//cout << cir_model_zero_bond(0.05, 0.18, 0.92, 980, 0.055, 1000, 0.5, 1, 0, 12345) << endl;
+	cout << cir_model_zero_bond(0.05, 0.18, 0.92, 980, 0.055, 1000, 0.5, 1, 0, 12345) << endl;
 	cir_explicit(0.05, 0.18, 0.92, 980, 0.055, 1000, 0.5, 1, 0);
 }
