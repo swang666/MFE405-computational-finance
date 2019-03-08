@@ -120,20 +120,20 @@ double vasicek_model_zero_bond_call(double r0, double sigma, double K, double st
 		double* Payoff = new double[num2];
 		double* rT = new double[n / 2 + 1];
 		rT[0] = r0;
-		double* rand_num1 = getLGM(n / 2, seed*(k + 1) + 30);
-		z1 = box_muller(rand_num1, n / 2);
+		double* rand_num1 = getLGM(n , seed*(k + 1) + 30);
+		z1 = box_muller(rand_num1, n );
 		for (int i = 1; i < n / 2 + 1; ++i) {
 			rT[i] = rT[i - 1] + K * (r_bar - rT[i - 1])*dt + sigma*sqrt(dt)*z1[i - 1];
 
 		}
 		delete[] rand_num1;
-		//delete[] z1;
+		delete[] z1;
 		for (int j = 0; j < num2; ++j) {
 			
 			double* rS = new double[n / 2 + 1];
 			rS[0] = rT[n / 2];
-			double* rand_num2 = getLGM(n / 2, (seed + k) *(j + 1) + 13);
-			double* z2 = box_muller(rand_num2, n / 2);
+			double* rand_num2 = getLGM(n, (seed + k) *(j + 1) + 13);
+			double* z2 = box_muller(rand_num2, n);
 			for (int i = 1; i < n / 2 + 1; ++i) {
 				rS[i] = rS[i - 1] + K * (r_bar - rS[i - 1])*dt + sigma*sqrt(dt)*z2[i - 1];
 			}
@@ -141,7 +141,59 @@ double vasicek_model_zero_bond_call(double r0, double sigma, double K, double st
 			Payoff[j] = P_TS;
 			delete[] rS;
 			delete[] rand_num2;
-			//delete[] z2;
+			delete[] z2;
+		}
+
+		double payoff = max(calc_mean(Payoff, num2) - strike, 0.0);
+		callprice[k] = exp(-trapzoid_method(0, n / 2, rT, dt)) * payoff;
+		delete[] Payoff;
+		delete[] rT;
+	}
+	double out = calc_mean(callprice, num1);
+	delete[] callprice;
+	return out;
+}
+
+double vasicek_model_coupon_bond_call(double r0, double sigma, double C, double K, double strike, double r_bar, double V, double T, double S, double t, int64_t seed) {
+	int period = S * 2;
+	int num1 = 1000;
+	int num2 = 1000;
+	int n = 126;
+	int n2 = S * 252;
+	double dt = (S - t) / n2;
+	double* callprice = new double[num1];
+	for (int k = 0; k < num1; ++k) {
+		double* z1;
+		double* Payoff = new double[num2];
+		double* rT = new double[n / 2 + 1];
+		rT[0] = r0;
+		double* rand_num1 = getLGM(n, seed*(k + 1) + 30);
+		z1 = box_muller(rand_num1, n);
+		for (int i = 1; i < n / 2 + 1; ++i) {
+			rT[i] = rT[i - 1] + K * (r_bar - rT[i - 1])*dt + sigma * sqrt(dt)*z1[i - 1];
+
+		}
+		delete[] rand_num1;
+		delete[] z1;
+		for (int j = 0; j < num2; ++j) {
+			double sum = 0;
+			double* rS = new double[n2 - n/2 + 1];
+			rS[0] = rT[n / 2];
+			double* rand_num2 = getLGM(n2, (seed + k) *(j + 1) + 13);
+			double* z2 = box_muller(rand_num2, n2);
+			for (int i = 1; i < n2- n / 2 + 1; ++i) {
+				rS[i] = rS[i - 1] + K * (r_bar - rS[i - 1])*dt + sigma * sqrt(dt)*z2[i - 1];
+			}
+			for (int i = 0; i < period - 1; ++i) {
+				sum = sum + C * exp(-trapzoid_method(0, n2 / 8 * (i + 1)-n/2, rS, dt));
+			}
+			sum = sum + (V + C) * exp(-trapzoid_method(0, n2 -n/2, rS, dt));
+			
+			Payoff[j] = sum;
+
+			delete[] rS;
+			delete[] rand_num2;
+			delete[] z2;
 		}
 
 		double payoff = max(calc_mean(Payoff, num2) - strike, 0.0);

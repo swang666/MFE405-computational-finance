@@ -9,6 +9,7 @@ double calc_mean(double *nums, int n);
 double vasicek_model_zero_bond(double r0, double sigma, double K, double r_bar, double V, double T, double t, int64_t seed);
 double vasicek_model_semicoupon_bond(double r0, double sigma, double C, double K, double r_bar, double V, double T, double t, int64_t seed);
 double vasicek_model_zero_bond_call(double r0, double sigma, double K, double strike, double r_bar, double V, double T, double S, double t, int64_t seed);
+double vasicek_model_coupon_bond_call(double r0, double sigma, double C, double K, double strike, double r_bar, double V, double T, double S, double t, int64_t seed);
 double trapzoid_method(int a, int b, double* integrand, double dt);
 double cir_model_zero_bond(double r0, double sigma, double K, double strike, double r_bar, double V, double T, double S, double t, int64_t seed);
 
