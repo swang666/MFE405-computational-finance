@@ -5,3 +5,13 @@
 /Project*/*
 /project*/*
 node_modules
+*.suo
+*.ipch
+*.vcxproj*
+*log
+*.exe
+*.ilk
+*.pdb
+*.log
+*.obj
+*.db
