@@ -1,3 +1,5 @@
 *.csv
 *.Rdata
 *.Rhistory
+/Eigen/*
+/Project*/*
