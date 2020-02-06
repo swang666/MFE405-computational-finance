@@ -2,4 +2,4 @@
 *.Rdata
 *.Rhistory
 /Eigen/*
-/Project*/*
+node_modules
